@@ -1,0 +1,15 @@
+.banner {
+  @apply absolute inset-x-0 flex bg-primary-500 top-(--wp-admin--admin-bar--height,0rem);
+
+  .brand {
+    @apply shrink p-4;
+  }
+
+  .nav-primary {
+    @apply grow;
+  }
+
+  .nav {
+    @apply justify-end p-4;
+  }
+}
