@@ -1,0 +1,99 @@
+@theme static {
+  /* Remove default Tailwind colors */
+  --color-*: initial;
+
+  /* basic colors */
+  --color-white: white;
+  --color-black: black;
+
+  /* primary palette */
+  --color-primary-50: color-mix(in oklch, var(--color-primary-500) 8%, white);
+  --color-primary-100: color-mix(in oklch, var(--color-primary-500) 18%, white);
+  --color-primary-200: color-mix(in oklch, var(--color-primary-500) 28%, white);
+  --color-primary-300: color-mix(in oklch, var(--color-primary-500) 40%, white);
+  --color-primary-400: color-mix(in oklch, var(--color-primary-500) 55%, white);
+  --color-primary-500: oklch(61.41% 0.2114 256.22); /* #007FFF */
+  --color-primary-600: color-mix(in oklch, var(--color-primary-500) 90%, black);
+  --color-primary-700: color-mix(in oklch, var(--color-primary-500) 78%, black);
+  --color-primary-800: color-mix(in oklch, var(--color-primary-500) 68%, black);
+  --color-primary-900: color-mix(in oklch, var(--color-primary-500) 60%, black);
+  --color-primary-950: color-mix(in oklch, var(--color-primary-500) 45%, black);
+
+  /* secondary palette */
+  --color-secondary-50: color-mix(in oklch, var(--color-secondary-500) 4%, white);
+  --color-secondary-100: color-mix(in oklch, var(--color-secondary-500) 9%, white);
+  --color-secondary-200: color-mix(in oklch, var(--color-secondary-500) 18%, white);
+  --color-secondary-300: color-mix(in oklch, var(--color-secondary-500) 30%, white);
+  --color-secondary-400: color-mix(in oklch, var(--color-secondary-500) 48%, white);
+  --color-secondary-500: oklch(73.04% 0.186 52.57); /* #FF7F02 */
+  --color-secondary-600: color-mix(in oklch, var(--color-secondary-500) 90%, black);
+  --color-secondary-700: color-mix(in oklch, var(--color-secondary-500) 79%, black);
+  --color-secondary-800: color-mix(in oklch, var(--color-secondary-500) 69%, black);
+  --color-secondary-900: color-mix(in oklch, var(--color-secondary-500) 60%, black);
+  --color-secondary-950: color-mix(in oklch, var(--color-secondary-500) 45%, black);
+
+  /* tertiary palette */
+  --color-tertiary-50: color-mix(in oklch, var(--color-tertiary-500) 3.6%, white);
+--color-tertiary-100: color-mix(in oklch, var(--color-tertiary-500) 7%, white);
+--color-tertiary-200: color-mix(in oklch, var(--color-tertiary-500) 15%, white);
+--color-tertiary-300: color-mix(in oklch, var(--color-tertiary-500) 28%, white);
+--color-tertiary-400: color-mix(in oklch, var(--color-tertiary-500) 50%, white);
+--color-tertiary-500: oklch(87.49% 0.235 151.02); /* #02FF7F */
+--color-tertiary-600: color-mix(in oklch, var(--color-tertiary-500) 90%, black);
+--color-tertiary-700: color-mix(in oklch, var(--color-tertiary-500) 80%, black);
+--color-tertiary-800: color-mix(in oklch, var(--color-tertiary-500) 70%, black);
+--color-tertiary-900: color-mix(in oklch, var(--color-tertiary-500) 55%, black);
+--color-tertiary-950: color-mix(in oklch, var(--color-tertiary-500) 30%, black);
+
+  /* gray palette */
+  --color-gray-50: color-mix(in oklch, var(--color-gray-500) 3.6%, white);
+  --color-gray-100: color-mix(in oklch, var(--color-gray-500) 7.2%, white);
+  --color-gray-200: color-mix(in oklch, var(--color-gray-500) 15.9%, white);
+  --color-gray-300: color-mix(in oklch, var(--color-gray-500) 29.4%, white);
+  --color-gray-400: color-mix(in oklch, var(--color-gray-500) 66.4%, white);
+  --color-gray-500: oklch(0.554 0.046 257.417); /* #7D7D7D */
+  --color-gray-600: color-mix(in oklch, var(--color-gray-500) 80.5%, black);
+  --color-gray-700: color-mix(in oklch, var(--color-gray-500) 67.1%, black);
+  --color-gray-800: color-mix(in oklch, var(--color-gray-500) 50.4%, black);
+  --color-gray-900: color-mix(in oklch, var(--color-gray-500) 37.5%, black);
+  --color-gray-950: color-mix(in oklch, var(--color-gray-500) 23.3%, black);
+
+  /* success palette */
+  --color-success-50: color-mix(in oklch, var(--color-success-500) 3.6%, white);
+  --color-success-100: color-mix(in oklch, var(--color-success-500) 7.2%, white);
+  --color-success-200: color-mix(in oklch, var(--color-success-500) 15.9%, white);
+  --color-success-300: color-mix(in oklch, var(--color-success-500) 29.4%, white);
+  --color-success-400: color-mix(in oklch, var(--color-success-500) 66.4%, white);
+  --color-success-500: oklch(77.05% 0.1646 161.39); /* #21D492 */
+  --color-success-600: color-mix(in oklch, var(--color-success-500) 80.5%, black);
+  --color-success-700: color-mix(in oklch, var(--color-success-500) 67.1%, black);
+  --color-success-800: color-mix(in oklch, var(--color-success-500) 50.4%, black);
+  --color-success-900: color-mix(in oklch, var(--color-success-500) 37.5%, black);
+  --color-success-950: color-mix(in oklch, var(--color-success-500) 23.3%, black);
+
+  /* error palette */
+  --color-error-50: color-mix(in oklch, var(--color-error-500) 3.6%, white);
+  --color-error-100: color-mix(in oklch, var(--color-error-500) 7.2%, white);
+  --color-error-200: color-mix(in oklch, var(--color-error-500) 15.9%, white);
+  --color-error-300: color-mix(in oklch, var(--color-error-500) 29.4%, white);
+  --color-error-400: color-mix(in oklch, var(--color-error-500) 66.4%, white);
+  --color-error-500: oklch(65.22% 0.2226 19.156); /* #FA3D56 */;
+  --color-error-600: color-mix(in oklch, var(--color-error-500) 80.5%, black);
+  --color-error-700: color-mix(in oklch, var(--color-error-500) 67.1%, black);
+  --color-error-800: color-mix(in oklch, var(--color-error-500) 50.4%, black);
+  --color-error-900: color-mix(in oklch, var(--color-error-500) 37.5%, black);
+  --color-error-950: color-mix(in oklch, var(--color-error-500) 23.3%, black);
+
+  /* warning palette */
+  --color-warning-50: color-mix(in oklch, var(--color-warning-500) 5%, white);
+  --color-warning-100: color-mix(in oklch, var(--color-warning-500) 10%, white);
+  --color-warning-200: color-mix(in oklch, var(--color-warning-500) 20%, white);
+  --color-warning-300: color-mix(in oklch, var(--color-warning-500) 29.4%, white);
+  --color-warning-400: color-mix(in oklch, var(--color-warning-500) 66.4%, white);
+  --color-warning-500: oklch(87.84% 0.1551 91.58); /* #FCD34A */
+  --color-warning-600: color-mix(in oklch, var(--color-warning-500) 80.5%, black);
+  --color-warning-700: color-mix(in oklch, var(--color-warning-500) 67.1%, black);
+  --color-warning-800: color-mix(in oklch, var(--color-warning-500) 50.4%, black);
+  --color-warning-900: color-mix(in oklch, var(--color-warning-500) 37.5%, black);
+  --color-warning-950: color-mix(in oklch, var(--color-warning-500) 23.3%, black);
+}
