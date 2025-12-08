@@ -1,5 +1,5 @@
 .banner {
-  @apply absolute inset-x-0 flex bg-primary-500 top-(--wp-admin--admin-bar--height,0rem);
+  @apply absolute inset-x-0 bg-primary-500 top-(--wp-admin--admin-bar--height,0rem) hidden md:flex;
 
   .brand {
     @apply shrink p-4;
@@ -11,5 +11,15 @@
 
   .nav {
     @apply justify-end p-4;
+
+    &.button-nav {
+      .button {
+        @apply bg-secondary-500 hover:bg-secondary-800 focus:bg-secondary-800 rounded-lg;
+      }
+    }
   }
+}
+
+.nav-primary {
+  @apply flex justify-end items-center;
 }

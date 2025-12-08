@@ -1,0 +1,3 @@
+.button {
+  @apply bg-primary-500 hover:bg-primary-800 hover:text-white focus:bg-primary-800 focus:text-white p-3 rounded-lg transition-colors duration-200;
+}
