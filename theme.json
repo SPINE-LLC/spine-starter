@@ -4,7 +4,8 @@
   "version": 3,
   "settings": {
     "layout": {
-      "contentSize": "48rem"
+      "contentSize": "48rem",
+      "wideSize": "64rem"
     },
     "background": {
       "backgroundImage": true
@@ -16,6 +17,7 @@
       "defaultDuotone": false,
       "defaultGradients": false,
       "defaultPalette": false,
+      "palette": [],
       "duotone": []
     },
     "custom": {
