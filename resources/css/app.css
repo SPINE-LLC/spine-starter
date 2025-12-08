@@ -1,3 +1,22 @@
-@import "tailwindcss" theme(static);
+@import 'tailwindcss' theme(static);
 @source "../views/";
 @source "../../app/";
+
+/* theme */
+@import './theme/colors.css';
+
+/* base */
+@layer base {
+  @import './base/nav.css';
+  @import './base/backgrounds.css';
+  @import './base/align.css';
+}
+
+/* components */
+@layer components {
+  @import './components/header.css';
+  @import './components/footer.css';
+  @import './components/button.css';
+}
+
+/* utilities - should mostly be handled by WP */
