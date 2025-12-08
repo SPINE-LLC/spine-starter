@@ -1,0 +1,45 @@
+/* Sets text color white for dark background colors */
+:where(
+  .has-black-background-color,
+
+  .has-primary-500-background-color,
+  .has-primary-600-background-color,
+  .has-primary-700-background-color,
+  .has-primary-800-background-color,
+  .has-primary-900-background-color,
+  .has-primary-950-background-color,
+
+  .has-secondary-500-background-color,
+  .has-secondary-800-background-color,
+  .has-secondary-900-background-color,
+  .has-secondary-950-background-color,
+
+  .has-tertiary-500-background-color,
+  .has-tertiary-950-background-color,
+
+  .has-gray-500-background-color,
+  .has-gray-600-background-color,
+  .has-gray-700-background-color,
+  .has-gray-800-background-color,
+  .has-gray-900-background-color,
+  .has-gray-950-background-color,
+
+  .has-success-500-background-color,
+  .has-success-800-background-color,
+  .has-success-900-background-color,
+  .has-success-950-background-color,
+
+  .has-warning-500-background-color,
+  .has-warning-800-background-color,
+  .has-warning-900-background-color,
+  .has-warning-950-background-color,
+
+  .has-error-600-background-color,
+  .has-error-700-background-color,
+  .has-error-800-background-color,
+  .has-error-900-background-color,
+  .has-error-950-background-color
+) {
+  @apply text-white;
+}
+
