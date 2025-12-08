@@ -110,7 +110,7 @@ class Button_Walker_Nav_Menu extends \Walker_Nav_Menu {
 			}
 		}
 		// Force a class on the anchors
-		$attributes .= ' class="button is-secondary"';
+		$attributes .= ' class="button"';
 
 		/** This filter is documented in wp-includes/post-template.php */
 		$title = apply_filters( 'the_title', $item->title, $item->ID );
