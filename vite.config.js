@@ -1,12 +1,18 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
-import laravel from 'laravel-vite-plugin'
+import laravel from 'laravel-vite-plugin';
 import { wordpressPlugin, wordpressThemeJson } from '@roots/vite-plugin';
 
 export default defineConfig({
   base: '/app/themes/sage/public/build/',
   plugins: [
-    tailwindcss(),
+    tailwindcss({
+      theme: {
+        screens: {
+          sm: '600px' /* to be in line with WordPress breakpoints */,
+        },
+      },
+    }),
     laravel({
       input: [
         'resources/css/app.css',
@@ -35,4 +41,4 @@ export default defineConfig({
       '@images': '/resources/images',
     },
   },
-})
+});
