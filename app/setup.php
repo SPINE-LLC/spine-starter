@@ -6,7 +6,11 @@
 
 namespace App;
 
+require_once __DIR__ . '/Walker/AriaWalkerNavMenu.php';
+
 use Illuminate\Support\Facades\Vite;
+
+
 
 /**
  * Inject styles into the block editor.
@@ -22,6 +26,8 @@ add_filter('block_editor_settings_all', function ($settings) {
 
     return $settings;
 });
+
+
 
 /**
  * Inject scripts into the block editor.
@@ -46,6 +52,8 @@ add_filter('admin_head', function () {
     ])->toHtml();
 });
 
+
+
 /**
  * Use the generated theme.json file.
  *
@@ -56,6 +64,11 @@ add_filter('theme_file_path', function ($path, $file) {
         ? public_path('build/assets/theme.json')
         : $path;
 }, 10, 2);
+
+
+
+
+
 
 /**
  * Register the initial theme setup.
@@ -129,6 +142,8 @@ add_action('after_setup_theme', function () {
      */
     add_theme_support('customize-selective-refresh-widgets');
 }, 20);
+
+
 
 /**
  * Register the theme sidebars.
