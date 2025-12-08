@@ -1,0 +1,111 @@
+@theme {
+  /* base font and color variables */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-size-small: 0.875rem;
+  --text-color: var(--color-black);
+  --button-text-color: var(--color-white);
+  --button-background-color: var(--color-primary-500);
+
+  /* dropdown common values */
+  --dropdown-item-padding: 0.5em;
+  --dropdown-item-line-height: 1.2;
+  --dropdown-item-opacity-hidden: 0.3;
+  --dropdown-item-opacity-visible: 1;
+  --dropdown-external-margin: 0.75ch;
+  --dropdown-external-size: 12px;
+  --dropdown-arrow-margin: 0.25em;
+  --dropdown-arrow-transform-y: calc(50% - 3px);
+  --dropdown-pointer-events: none;
+
+  /* dropdown depth 1 menu */
+  --dropdown-depth-1-menu-color: var(--color-black);
+  --dropdown-depth-1-menu-background-color: transparent;
+  --dropdown-depth-1-menu-font-family: var(--font-family-base);
+  --dropdown-depth-1-menu-font-weight: var(--font-weight-light);
+  --dropdown-depth-1-menu-font-size: ;
+  --dropdown-depth-1-menu-transition: 280ms all 120ms ease-out;
+  --dropdown-depth-1-menu-padding: 0;
+  --dropdown-depth-1-menu-radius: 50px;
+  --dropdown-depth-1-menu-gap: 0.3rem;
+  --dropdown-depth-1-menu-min-width: 20ch;
+
+  /* dropdown depth 1 item */
+  --dropdown-depth-1-item-color: var(--dropdown-depth-1-menu-color);
+  --dropdown-depth-1-item-hover-color: var(--color-white);
+  --dropdown-depth-1-item-hover-background: var(--color-primary-500);
+  --dropdown-depth-1-item-focus-color: var(--dropdown-depth-1-item-hover-color);
+  --dropdown-depth-1-item-focus-background: var(--dropdown-depth-1-item-hover-background);
+  --dropdown-depth-1-item-active-color: var(--color-white);
+  --dropdown-depth-1-item-active-background: var(--color-primary-900);
+  --dropdown-depth-1-item-radius: var(--dropdown-depth-1-menu-radius);
+  --dropdown-depth-1-item-padding: 0.4em 0.8em;
+
+  /* dropdown depth 1 arrow */
+  --dropdown-depth-1-item-arrow-color: color-mix(in oklch, var(--color-black), transparent 55%);
+  --dropdown-depth-1-item-arrow-hover-color: var(--dropdown-depth-1-item-hover-color);
+  --dropdown-depth-1-item-arrow-focus-color: var(--dropdown-depth-1-item-focus-color);
+  --dropdown-depth-1-item-arrow-active-color: var(--dropdown-depth-1-item-active-color);
+  --dropdown-depth-1-item-arrow-size: 6px;
+  --dropdown-depth-1-item-arrow-padding: 1.5rem;
+
+  /* dropdown depth 2 menu */
+  --dropdown-depth-2-menu-background-color: var(--color-gray-200);
+  --dropdown-depth-2-menu-padding: 0.5em;
+  --dropdown-depth-2-menu-border-radius: 4px;
+  --dropdown-depth-2-menu-box-shadow: 0 0.15em 0.25em color-mix(in oklch, var(--color-black), transparent 50%);
+  --dropdown-depth-2-menu-min-width: var(--dropdown-depth-1-menu-min-width);
+  --dropdown-depth-2-menu-arrow-size: 0.35rem;
+  --dropdown-depth-2-menu-arrow-pointer-size: 0.55em;
+  --dropdown-depth-2-menu-position-offset: 1rem;
+  --dropdown-depth-2-menu-transform-hidden: rotateX(-90deg) translateX(-50%);
+  --dropdown-depth-2-menu-transform-visible: rotateX(0) translateX(-50%);
+
+  /* dropdown depth 2 item */
+  --dropdown-depth-2-item-color: var(--dropdown-depth-1-menu-color);
+  --dropdown-depth-2-item-font-size: var(--font-size-small);
+  --dropdown-depth-2-item-font-weight: var(--font-weight-normal);
+  --dropdown-depth-2-item-hover-color: var(--color-white);
+  --dropdown-depth-2-item-hover-background: var(--color-primary-500);
+  --dropdown-depth-2-item-focus-color: var(--dropdown-depth-2-item-hover-color);
+  --dropdown-depth-2-item-focus-background: var(--dropdown-depth-2-item-hover-background);
+  --dropdown-depth-2-item-active-color: var(--dropdown-depth-1-item-active-color);
+  --dropdown-depth-2-item-active-background: var(--dropdown-depth-1-item-active-background);
+
+  /* dropdown depth 2 arrow */
+  --dropdown-depth-2-item-arrow-color: var(--dropdown-depth-1-item-arrow-color);
+  --dropdown-depth-2-item-arrow-hover-color: var(--dropdown-depth-1-item-arrow-hover-color);
+  --dropdown-depth-2-item-arrow-focus-color: var(--dropdown-depth-1-item-arrow-hover-color);
+  --dropdown-depth-2-item-arrow-active-color: var(--dropdown-depth-1-item-arrow-hover-color);
+
+  /* dropdown depth 3 menu */
+  --dropdown-depth-3-menu-background-color: var(--color-gray-400);
+  --dropdown-depth-3-menu-padding: var(--dropdown-depth-2-menu-padding);
+  --dropdown-depth-3-menu-border-radius: var(--dropdown-depth-2-menu-border-radius);
+  --dropdown-depth-3-menu-box-shadow: var(--dropdown-depth-2-menu-box-shadow);
+  --dropdown-depth-3-menu-min-width: var(--dropdown-depth-2-menu-min-width);
+  --dropdown-depth-3-menu-arrow-size: var(--dropdown-depth-2-menu-arrow-size);
+  --dropdown-depth-3-menu-arrow-pointer-size: 0.5em;
+  --dropdown-depth-3-menu-position-offset: 1.5rem;
+  --dropdown-depth-3-menu-position-start: -0.5rem;
+  --dropdown-depth-3-menu-transform-hidden: rotateY(-90deg) translateX(50%);
+  --dropdown-depth-3-menu-transform-visible: rotateY(0) translateX(50%);
+
+  /* dropdown depth 3 item */
+  --dropdown-depth-3-item-color: var(--dropdown-depth-2-item-color);
+  --dropdown-depth-3-item-font-size: var(--dropdown-depth-2-item-font-size);
+  --dropdown-depth-3-item-font-weight: var(--dropdown-depth-2-item-font-weight);
+  --dropdown-depth-3-item-hover-color: var(--dropdown-depth-2-item-hover-color);
+  --dropdown-depth-3-item-hover-background: var(--dropdown-depth-2-item-hover-background);
+  --dropdown-depth-3-item-focus-color: var(--dropdown-depth-3-item-hover-color);
+  --dropdown-depth-3-item-focus-background: var(--dropdown-depth-3-item-hover-background);
+  --dropdown-depth-3-item-active-color: var(--dropdown-depth-2-item-active-color);
+  --dropdown-depth-3-item-active-background: var(--dropdown-depth-2-item-active-background);
+
+  /* dropdown depth 3 arrow */
+  --dropdown-depth-3-item-arrow-color: var(--dropdown-depth-1-item-arrow-color);
+  --dropdown-depth-3-item-arrow-hover-color: var(--dropdown-depth-1-item-arrow-hover-color);
+  --dropdown-depth-3-item-arrow-focus-color: var(--dropdown-depth-3-item-arrow-hover-color);
+  --dropdown-depth-3-item-arrow-active-color: var(--dropdown-depth-3-item-arrow-hover-color);
+}

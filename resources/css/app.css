@@ -4,6 +4,7 @@
 
 /* theme */
 @import './theme/colors.css';
+@import './theme/general.css';
 
 /* base */
 @layer base {
@@ -17,6 +18,7 @@
   @import './components/header.css';
   @import './components/footer.css';
   @import './components/button.css';
+  @import './components/dropdown.css';
 }
 
 /* utilities - should mostly be handled by WP */

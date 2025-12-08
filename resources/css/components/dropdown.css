@@ -1,0 +1,350 @@
+/** Learn about how this was made:
+ * @link https://moderncss.dev/css-only-accessible-dropdown-navigation-menu/
+ */
+
+/* Base dropdown trigger styles */
+:is([aria-haspopup="true"] > button, [aria-haspopup="true"] > a) {
+  background-color: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+/* Main dropdown menu container */
+.nav-primary > div {
+  font-family: var(--dropdown-depth-1-menu-font-family);
+  font-weight: var(--dropdown-depth-1-menu-font-weight);
+  background-color: var(--dropdown-depth-1-menu-background-color);
+  border-radius: var(--dropdown-depth-1-menu-radius);
+  padding: var(--dropdown-depth-1-menu-padding);
+  display: grid;
+  grid-template: 1fr/1fr;
+  place-items: center;
+
+  /* Reset list styles */
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+
+    li {
+      padding: 0;
+      break-inside: avoid;
+
+      /* External link icons */
+      a .external {
+        margin-inline-start: var(--dropdown-external-margin);
+        width: var(--dropdown-external-size);
+        height: var(--dropdown-external-size);
+        display: inline-flex;
+
+        svg path {
+          fill: var(--dropdown-depth-1-menu-color);
+          transition: var(--dropdown-depth-1-menu-transition);
+        }
+      }
+
+      /* External link hover/focus states */
+      a:is(:hover, :focus, [aria-expanded="true"]) .external svg path {
+        fill: var(--dropdown-depth-1-item-hover-color);
+      }
+    }
+  }
+
+  /* Depth 2 - First submenu level */
+  > ul {
+    grid-auto-flow: column;
+    align-items: center;
+    gap: var(--dropdown-depth-1-menu-gap);
+
+    > li {
+      /* Parent items with submenus */
+      &[aria-haspopup="true"] {
+        position: relative;
+
+        /* Parent item trigger */
+        > :is(a, button):not(.button) {
+          display: inline-flex;
+          align-items: center;
+          transition-property: opacity, transform;
+
+          /* Dropdown arrow */
+          &::after {
+            content: "";
+            border: var(--dropdown-depth-2-menu-arrow-size) solid transparent;
+            border-block-start-color: var(--dropdown-depth-1-item-arrow-color);
+            margin-inline-start: var(--dropdown-arrow-margin);
+            transform: translateY(var(--dropdown-arrow-transform-y));
+            display: inline-block;
+            pointer-events: var(--dropdown-pointer-events);
+            transition: border-color var(--dropdown-depth-1-menu-transition);
+          }
+        }
+
+        /* Submenu container */
+        > .sub-menu {
+          position: absolute;
+          min-width: var(--dropdown-depth-2-menu-min-width);
+          inset-inline-start: 50%;
+          inset-block-start: 100%;
+          transition: var(--dropdown-depth-1-menu-transition);
+          transform: var(--dropdown-depth-2-menu-transform-hidden);
+          transform-origin: top center;
+          visibility: hidden;
+          opacity: var(--dropdown-item-opacity-hidden);
+          padding: var(--dropdown-depth-2-menu-padding);
+          background-color: var(--dropdown-depth-2-menu-background-color);
+          border-radius: var(--dropdown-depth-2-menu-border-radius);
+          box-shadow: var(--dropdown-depth-2-menu-box-shadow);
+          display: unset;
+          overflow-wrap: break-word;
+
+          /* Submenu items */
+          a {
+            color: var(--dropdown-depth-2-item-color);
+            display: block;
+            padding: var(--dropdown-item-padding);
+            opacity: 0;
+            transition: var(--dropdown-depth-1-menu-transition);
+            transition-property: opacity;
+            font-size: var(--dropdown-depth-2-item-font-size);
+            font-weight: var(--dropdown-depth-2-item-font-weight);
+            line-height: var(--dropdown-item-line-height);
+
+            .external svg path {
+              fill: var(--dropdown-depth-2-item-color);
+              transition: none;
+            }
+
+            /* Active state */
+            &[aria-current="page"] {
+              color: var(--dropdown-depth-2-item-active-color);
+              background-color: var(--dropdown-depth-2-item-active-background);
+              .external svg path { fill: var(--dropdown-depth-2-item-active-color); }
+            }
+
+            /* Hover state */
+            &:hover {
+              color: var(--dropdown-depth-2-item-hover-color);
+              background-color: var(--dropdown-depth-2-item-hover-background);
+              .external svg path { fill: var(--dropdown-depth-2-item-hover-color); }
+            }
+
+            /* Focus state */
+            &:focus {
+              color: var(--dropdown-depth-2-item-focus-color);
+              background-color: var(--dropdown-depth-2-item-focus-background);
+              .external svg path { fill: var(--dropdown-depth-2-item-focus-color); }
+            }
+          }
+        }
+
+        /* Arrow pointer */
+        &::after {
+          content: "";
+          border: var(--dropdown-depth-2-menu-arrow-pointer-size) solid transparent;
+          border-block-end-color: var(--dropdown-depth-2-menu-background-color);
+          position: absolute;
+          inset-block-start: calc(100% - var(--dropdown-depth-2-menu-position-offset));
+          inset-inline-start: 50%;
+          transform: translateX(-50%);
+          transition: var(--dropdown-depth-1-menu-transition);
+          opacity: 0;
+          will-change: opacity;
+          pointer-events: var(--dropdown-pointer-events);
+        }
+
+        /* Active state */
+        &:has(> :is(a, button):not(.button)[aria-current="page"]) {
+          > :is(a, button):not(.button)::after {
+            border-block-start-color: var(--dropdown-depth-2-item-arrow-active-color);
+          }
+        }
+
+        /* Hover/focus states */
+        &:is(:hover, :focus-within, [aria-expanded="true"]) {
+          > :is(a, button):not(.button) {
+            border-block-start-color: var(--color-primary-500);
+
+            &::after {
+              border-block-start-color: var(--dropdown-depth-2-item-arrow-hover-color);
+            }
+          }
+
+          > .sub-menu {
+            opacity: var(--dropdown-item-opacity-visible);
+            transform: var(--dropdown-depth-2-menu-transform-visible);
+            visibility: visible;
+
+            a {
+              opacity: var(--dropdown-item-opacity-visible);
+            }
+          }
+
+          &::after {
+            opacity: var(--dropdown-item-opacity-visible);
+          }
+        }
+      }
+
+      /* Regular depth 1 items (no submenu) */
+      :is(a, button):not(.button) {
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+        color: var(--dropdown-depth-1-item-color);
+        font-size: var(--dropdown-depth-1-menu-font-size);
+        border-radius: var(--dropdown-depth-1-item-radius);
+        padding: var(--dropdown-depth-1-item-padding);
+        transition: var(--dropdown-depth-1-menu-transition);
+
+        /* Active state */
+        &[aria-current="page"] {
+          color: var(--dropdown-depth-1-item-active-color);
+          background: var(--dropdown-depth-1-item-active-background);
+        }
+
+        /* Hover state */
+        &:is(:hover, [aria-expanded="true"]) {
+          border-block-start-color: var(--color-primary-500);
+          color: var(--dropdown-depth-1-item-hover-color);
+          background: var(--dropdown-depth-1-item-hover-background);
+        }
+
+        /* Focus state */
+        &:focus {
+          border-block-start-color: var(--color-primary-500);
+          color: var(--dropdown-depth-1-item-focus-color);
+          background: var(--dropdown-depth-1-item-focus-background);
+        }
+      }
+
+      /* Depth 3 - Second submenu level */
+      > ul {
+        grid-auto-flow: row;
+
+        > li {
+          margin: 0;
+
+          /* Parent items with submenus */
+          &[aria-haspopup="true"] {
+            position: relative;
+
+            /* Parent item trigger */
+            > :is(a, button) {
+              display: inline-flex;
+              align-items: center;
+
+              /* Dropdown arrow */
+              &::after {
+                content: "";
+                border: var(--dropdown-depth-3-menu-arrow-size) solid transparent;
+                border-inline-start-color: var(--dropdown-depth-1-item-arrow-color);
+                margin-inline-start: var(--dropdown-arrow-margin);
+                transform: translateX(var(--dropdown-arrow-transform-y));
+                display: inline-block;
+                transition: border-color var(--dropdown-depth-1-menu-transition);
+              }
+            }
+
+            /* Submenu container */
+            > .sub-menu {
+              position: absolute;
+              min-width: var(--dropdown-depth-3-menu-min-width);
+              inset-inline-start: 50%;
+              inset-block-start: var(--dropdown-depth-3-menu-position-start);
+              transition: var(--dropdown-depth-1-menu-transition);
+              transform: var(--dropdown-depth-3-menu-transform-hidden);
+              transform-origin: top center;
+              visibility: hidden;
+              opacity: var(--dropdown-item-opacity-hidden);
+              padding: var(--dropdown-depth-3-menu-padding);
+              background-color: var(--dropdown-depth-3-menu-background-color);
+              border-radius: var(--dropdown-depth-3-menu-border-radius);
+              box-shadow: var(--dropdown-depth-3-menu-box-shadow);
+
+              /* Submenu items */
+              a {
+                color: var(--dropdown-depth-3-item-color);
+                display: block;
+                padding: var(--dropdown-item-padding);
+                opacity: 0;
+                transition: var(--dropdown-depth-1-menu-transition);
+                transition-property: opacity;
+                font-size: var(--dropdown-depth-3-item-font-size);
+                font-weight: var(--dropdown-depth-3-item-font-weight);
+
+                /* Active state */
+                &[aria-current="page"] {
+                  color: var(--dropdown-depth-3-item-active-color);
+                  background-color: var(--dropdown-depth-3-item-active-background);
+                }
+
+                /* Hover state */
+                &:hover {
+                  color: var(--dropdown-depth-3-item-hover-color);
+                  background-color: var(--dropdown-depth-3-item-hover-background);
+                }
+
+                /* Focus state */
+                &:focus {
+                  color: var(--dropdown-depth-3-item-focus-color);
+                  background-color: var(--dropdown-depth-3-item-focus-background);
+                }
+              }
+            }
+
+            /* Arrow pointer */
+            &::after {
+              content: "";
+              border: var(--dropdown-depth-3-menu-arrow-pointer-size) solid transparent;
+              border-inline-end-color: var(--dropdown-depth-3-menu-background-color);
+              position: absolute;
+              inset-block-start: calc(100% - var(--dropdown-depth-3-menu-position-offset));
+              inset-inline-start: calc(100% + 1.13rem);
+              transform: translateX(-150%);
+              transition: var(--dropdown-depth-1-menu-transition);
+              opacity: 0;
+              will-change: opacity;
+              pointer-events: var(--dropdown-pointer-events);
+            }
+
+            /* Active state */
+            &:has(> :is(a, button)[aria-current="page"]) {
+              > :is(a, button)::after {
+                border-inline-start-color: var(--dropdown-depth-3-item-arrow-active-color);
+              }
+            }
+
+            /* Hover/focus states */
+            &:is(:hover, :focus-within, [aria-expanded="true"]) {
+              > :is(a, button):not(.button) {
+                border-block-start-color: var(--color-primary-500);
+              }
+
+              > :is(a, button)::after {
+                border-inline-start-color: var(--dropdown-depth-3-item-arrow-hover-color);
+              }
+
+              > .sub-menu {
+                opacity: var(--dropdown-item-opacity-visible);
+                transform: var(--dropdown-depth-3-menu-transform-visible);
+                visibility: visible;
+
+                a {
+                  opacity: var(--dropdown-item-opacity-visible);
+                }
+              }
+
+              &::after {
+                opacity: var(--dropdown-item-opacity-visible);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /* Future: If a 4th or more depth is allowed, style it here */
+  }
+}

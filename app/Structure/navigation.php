@@ -30,7 +30,7 @@ add_action('after_setup_theme', function () {
 function primary_nav() {
     return wp_nav_menu([
         'theme_location' => 'primary_navigation',
-        'menu_class' => 'nav',
+        'menu_class' => 'nav is-dropdown',
         'depth' => 3,
         'echo' => false,
         'walker' => new \App\Walker\Aria_Walker_Nav_Menu()
