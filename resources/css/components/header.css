@@ -1,5 +1,5 @@
 .banner {
-  @apply fixed inset-x-0 bg-primary-500 top-(--wp-admin--admin-bar--height,0rem) hidden lg:flex z-[90];
+  @apply sticky inset-x-0 bg-primary-500 top-(--wp-admin--admin-bar--height,0rem) hidden lg:flex z-[90] h-(--site-header-height);
 
   .brand {
     @apply shrink p-4;
