@@ -12,4 +12,10 @@ dialog {
   &::backdrop {
     @apply bg-black opacity-75;
   }
+
+  &[open] {
+    body:has(&) {
+      @apply overflow-hidden;
+    }
+  }
 }
