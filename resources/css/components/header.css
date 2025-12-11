@@ -1,5 +1,5 @@
 .banner {
-  @apply absolute inset-x-0 bg-primary-500 top-(--wp-admin--admin-bar--height,0rem) hidden md:flex;
+  @apply fixed inset-x-0 bg-primary-500 top-(--wp-admin--admin-bar--height,0rem) hidden lg:flex;
 
   .brand {
     @apply shrink p-4;
@@ -22,4 +22,16 @@
 
 .nav-primary {
   @apply flex justify-end items-center;
+}
+
+.compact-menu {
+  @apply fixed inset-x-0 bg-primary-500 flex lg:hidden top-(--wp-admin--admin-bar--height,0rem);
+
+  .brand {
+    @apply shrink p-4;
+  }
+
+  .open-buttons {
+    @apply flex grow justify-end items-center;
+  }
 }

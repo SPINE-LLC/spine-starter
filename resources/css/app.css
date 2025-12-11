@@ -4,10 +4,13 @@
 
 /* theme */
 @import './theme/colors.css';
-@import './theme/general.css';
 
 /* base */
 @layer base {
+  @import './base/variables.css';
+  @import './base/html-body.css';
+  @import './base/typography.css';
+  @import './base/dialog.css';
   @import './base/nav.css';
   @import './base/backgrounds.css';
   @import './base/align.css';

@@ -1,4 +1,23 @@
 @import "tailwindcss";
 
+/* theme */
+@import './theme/colors.css';
+@import './theme/general.css';
 
-@import './base/backgrounds.css';
+/* base */
+@layer base {
+  @import './base/variables.css';
+  @import './base/typography.css';
+  @import './base/dialog.css';
+  @import './base/nav.css';
+  @import './base/backgrounds.css';
+  @import './base/align.css';
+}
+
+/* components */
+@layer components {
+  @import './components/header.css';
+  @import './components/footer.css';
+  @import './components/button.css';
+  @import './components/dropdown.css';
+}
