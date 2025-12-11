@@ -2,11 +2,11 @@
 
 /* theme */
 @import './theme/colors.css';
-@import './theme/general.css';
 
 /* base */
 @layer base {
   @import './base/variables.css';
+  @import './base/html-body.css';
   @import './base/typography.css';
   @import './base/dialog.css';
   @import './base/nav.css';
@@ -18,6 +18,8 @@
 @layer components {
   @import './components/header.css';
   @import './components/footer.css';
-  @import './components/button.css';
   @import './components/dropdown.css';
 }
+
+/* blocks */
+@import './blocks/button.css';

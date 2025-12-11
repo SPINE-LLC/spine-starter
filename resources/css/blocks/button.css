@@ -1,0 +1,14 @@
+:is(.wp-element-button, .wp-block-button__link) {
+  @apply px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-700 focus:bg-primary-700 transition-colors duration-200;
+}
+
+.wp-block-button {
+  @apply inline-block;
+
+  /* outline style */
+  &.is-style-outline {
+    :is(.wp-element-button, .wp-block-button__link) {
+      @apply px-4 py-2 border-primary-500 text-primary-500 bg-transparent rounded hover:bg-primary-700 hover:border-primary-700 hover:text-white focus:bg-primary-700 focus:border-primary-700 focus:text-white transition-colors duration-200;
+    }
+  }
+}

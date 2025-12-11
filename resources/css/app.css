@@ -20,8 +20,10 @@
 @layer components {
   @import './components/header.css';
   @import './components/footer.css';
-  @import './components/button.css';
   @import './components/dropdown.css';
 }
+
+/* blocks - not in a layer so that it can override WP */
+@import './blocks/button.css';
 
 /* utilities - should mostly be handled by WP */
