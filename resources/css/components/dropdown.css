@@ -190,7 +190,7 @@
 
     /* Regular depth 1 items (no submenu) */
     :is(a, button):not(.button) {
-      text-decoration: none;
+      text-decoration: none !important;
       text-align: center;
       display: inline-block;
       color: var(--dropdown-depth-1-item-color);
@@ -203,6 +203,7 @@
       &[aria-current="page"] {
         color: var(--dropdown-depth-1-item-active-color);
         background: var(--dropdown-depth-1-item-active-background);
+        text-decoration: none;
       }
 
       /* Hover state */
