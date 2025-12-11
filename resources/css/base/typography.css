@@ -26,8 +26,24 @@ p {
   @apply mb-4 leading-relaxed;
 }
 
-ul, ol {
+:where(ul, ol) {
   @apply mb-4 pl-6;
+}
+
+ul, ul ul ul ul, ul ul ul ul ul ul ul {
+  @apply list-disc;
+}
+
+ul ul, ul ul ul ul ul, ul ul ul ul ul ul ul ul {
+  @apply list-[circle];
+}
+
+ul ul ul, ul ul ul ul ul ul, ul ul ul ul ul ul ul ul ul {
+  @apply list-[square];
+}
+
+ol {
+  @apply list-decimal;
 }
 
 li {
