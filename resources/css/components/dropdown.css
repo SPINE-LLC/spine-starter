@@ -20,6 +20,7 @@
   grid-auto-flow: column;
   align-items: center;
   gap: var(--dropdown-depth-1-menu-gap);
+  list-style: none;
 
   /* Reset list styles */
   ul {
