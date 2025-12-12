@@ -18,6 +18,7 @@ class Accordion_Walker_Nav_Menu extends \Walker_Nav_Menu {
 	// allow throughout
 	private $parent_title = '';
 	private $sub_menu_id  = '';
+	private $parent_ids   = array();
 
 	/**
 	 * Start the element output.
@@ -33,11 +34,15 @@ class Accordion_Walker_Nav_Menu extends \Walker_Nav_Menu {
 		// Store parent link's title & sub menu id
 		if ( 0 === $depth && in_array( 'menu-item-has-children', $item->classes, true ) ) {
 			$this->parent_title = $item->title;
+			$this->parent_id    = $item->ID;
 			$this->sub_menu_id  = sprintf(
 				'sub-menu-%s-%s',
 				$depth + 1,
 				sanitize_title( $item->title ),
 			);
+		}
+		if ( in_array( 'menu-item-has-children', $item->classes, true ) ) {
+			$this->parent_ids[$depth] = $item->ID;
 		}
 
 		/**
@@ -62,8 +67,7 @@ class Accordion_Walker_Nav_Menu extends \Walker_Nav_Menu {
 		 * @param array  $args    An array of {@see wp_nav_menu()} arguments.
 		 * @param int    $depth   Depth of menu item. Used for padding.
 		 */
-		//$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
-		$class_names = ''; // Remove default classes
+		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
 		$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . '"' : '';
 
 		/**
@@ -182,6 +186,12 @@ class Accordion_Walker_Nav_Menu extends \Walker_Nav_Menu {
 		// Default class.
 		$classes = array( 'sub-menu' );
 
+		// Add class for parent menu item
+		$parent_id_for_class = isset( $this->parent_ids[$depth] ) ? $this->parent_ids[$depth] : 0;
+		if ( $parent_id_for_class ) {
+			$classes[] = 'sub-menu-for-menu-item-' . $parent_id_for_class;
+		}
+
 		/**
 		 * Filters the CSS class(es) applied to a menu list element.
 		 *
@@ -197,7 +207,13 @@ class Accordion_Walker_Nav_Menu extends \Walker_Nav_Menu {
 		// Get parent link's title from the stored property
 		$parent_name = $this->parent_title;
 
-		$output .= "{$n}{$indent}<details><summary><span class=\"screen-reader-text\">$parent_name Overview</span></summary><ul$class_names aria-label=\"$parent_name\">{$n}";
+		$name_attr = '';
+		if ( 0 === $depth ) {
+			$name_attr = ' name="compact-sub-menu"';
+		} elseif ( $depth > 0 ) {
+			$name_attr = ' name="compact-sub-menu-for-menu-item-' . $this->parent_id . '"';
+		}
+		$output .= "{$n}{$indent}<details{$name_attr}><summary><span class=\"screen-reader-text\">$parent_name Overview</span></summary><ul$class_names aria-label=\"$parent_name\">{$n}";
 	}
 
 	public function end_lvl( &$output, $depth = 0, $args = null ) {
