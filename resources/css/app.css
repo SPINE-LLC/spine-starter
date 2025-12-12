@@ -25,5 +25,6 @@
 
 /* blocks - not in a layer so that it can override WP */
 @import './blocks/button.css';
+@import './blocks/separator.css';
 
 /* utilities - should mostly be handled by WP */
