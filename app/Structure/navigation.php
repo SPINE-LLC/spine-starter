@@ -75,7 +75,7 @@ function compact_btns_nav() {
 function compact_nav() {
 	return wp_nav_menu([
 		'theme_location' => 'compact_navigation',
-		'menu_class' => 'nav',
+		'menu_class' => 'nav accordion',
 		'depth' => 3,
 		'echo' => false,
 		'walker' => new \App\Walker\Accordion_Walker_Nav_Menu()

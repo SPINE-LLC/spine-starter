@@ -1,154 +1,107 @@
 .accordion {
-  grid-auto-flow: row;
-  gap: inherit;
-  color: var(--accordion-text-color);
-  margin: 1rem 0;
-  width: 100%;
+  @apply grid grid-flow-row gap-[inherit] text-(--accordion-text-color) my-4 mx-0 w-full;
 
   .external {
     svg {
-      fill: var(--accordion-text-color);
+      @apply fill-(--accordion-text-color);
     }
   }
 
   :where(&, & li) {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    @apply m-0 p-0 list-none;
   }
 
   /* submenu group */
   details {
-    width: 100%;
-    margin-block-start: calc(var(--accordion-caret-height) * -1);
+    @apply w-full mt-[calc(-1*var(--accordion-caret-height))];
 
     > ul {
-      margin: 1rem 0;
-      border-radius: var(--accordion-border-radius);
-      background-color: var(--color-gray-500);
-      padding: 0.5rem;
+      @apply my-4 mx-0 rounded-(--accordion-border-radius) bg-gray-500 p-2;
     }
   }
 
   /* caret */
   summary {
-    padding: 0.4em 0.6em 0.5em 0.85em;
-    background-color: var(--accordion-caret-background-color);
-    color: var(--accordion-caret-color);
-    height: var(--accordion-caret-height);
-    border-radius: var(--accordion-caret-radius);
-    width: var(--accordion-caret-width);
-    margin: 0 0 0 auto;
-    text-align: center;
-    cursor: pointer;
-    text-align: center;
-    box-sizing: border-box;
-    margin-block-start: -2px;
+    @apply pt-[0.4em] pr-[0.6em] pb-[0.5em] pl-[0.85em] bg-(--accordion-caret-background-color) text-(--accordion-caret-color) h-(--accordion-caret-height) rounded-(--accordion-caret-radius) w-(--accordion-caret-width) my-0 mr-0 ml-auto text-center cursor-pointer box-border -top-0.5;
 
     &:hover {
-      color: var(--accordion-caret-hover-text-color);
-      background-color: var(--accordion-caret-hover-background-color);
+      @apply text-(--accordion-caret-hover-text-color) bg-(--accordion-caret-hover-background-color);
     }
 
     &:focus {
-      color: var(--accordion-caret-focus-text-color);
-      background-color: var(--accordion-caret-focus-background-color);
-      outline: solid var(--outline-width) var(--outline-color);
+      @apply text-(--accordion-caret-focus-text-color) bg-(--accordion-caret-focus-background-color);
     }
   }
 
   details[open] {
-    position: relative;
+    @apply relative;
   }
 
   a {
-    width: 100%;
-    display: flex;
-    text-decoration: none;
-    align-items: center;
-    gap: 0.5em;
-    padding: 0.4rem 0.5rem;
-    border-radius: var(--accordion-border-radius);
-    padding: var(--accordion-padding);
+    @apply w-full flex no-underline! items-center gap-[0.5em] py-2 px-2 rounded-(--accordion-border-radius) p-(--accordion-padding);
   }
 
   > li {
-    margin-block-end: 0.5rem;
-    display: flex;
-    flex-flow: row wrap;
+    @apply mb-2 flex flex-row flex-wrap;
 
     > a {
-      z-index: 1;
-      width: 100%;
-      color: var(--accordion-text-color);
-      padding: var(--accordion-details-padding);
+      @apply z-1 w-full text-(--accordion-text-color) p-(--accordion-details-padding);
 
       .external {
         svg {
-          fill: var(--accordion-text-color);
+          @apply fill-(--accordion-text-color);
         }
       }
 
       &:hover {
-        color: var(--accordion-hover-text-color);
-        background-color: var(--accordion-hover-background-color);
+        @apply text-(--accordion-hover-text-color) bg-(--accordion-hover-background-color);
 
         .external {
           svg {
-            fill: var(--accordion-hover-text-color);
+            @apply fill-(--accordion-hover-text-color);
           }
         }
       }
 
       &:focus {
-        color: var(--accordion-focus-text-color);
-        background-color: var(--accordion-focus-background-color);
+        @apply text-(--accordion-focus-text-color) bg-(--accordion-focus-background-color);
 
         .external {
           svg {
-            fill: var(--accordion-focus-text-color);
+            @apply fill-(--accordion-focus-text-color);
           }
         }
       }
 
       &:has(+ details) {
-        width: calc(100% - var(--accordion-caret-width) - 1rem);
-      }
-
-      html.no-js & {
-        @supports not selector(:has) {
-          width: calc(100% - var(--accordion-caret-width) - 1rem);
-        }
+        @apply w-[calc(100%-var(--accordion-caret-width)-1rem)];
       }
     }
 
     li {
-      margin: 0.1em 0;
+      @apply my-[0.1em] mx-0;
 
       a {
-        color: var(--accordion-details-text-color);
-        padding: 0.5em;
+        @apply text-(--accordion-details-text-color) p-[0.5em];
 
         .external {
           svg {
-            fill: var(--accordion-details-text-color);
+            @apply fill-(--accordion-details-text-color);
           }
         }
 
         &:hover {
-          color: var(--accordion-details-hover-text-color);
-          background-color: var(--accordion-details-hover-background-color);
+          @apply text-(--accordion-details-hover-text-color) bg-(--accordion-details-hover-background-color);
         }
 
         &:focus {
-          color: var(--accordion-details-focus-text-color);
-          background-color: var(--accordion-details-focus-background-color);
+          @apply text-(--accordion-details-focus-text-color) bg-(--accordion-details-focus-background-color);
         }
       }
     }
   }
 
   details {
-    margin-block-end: 0;
+    @apply mb-0;
   }
 }

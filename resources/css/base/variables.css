@@ -110,4 +110,55 @@
   --dropdown-depth-3-item-arrow-hover-color: var(--dropdown-depth-1-item-arrow-hover-color);
   --dropdown-depth-3-item-arrow-focus-color: var(--dropdown-depth-3-item-arrow-hover-color);
   --dropdown-depth-3-item-arrow-active-color: var(--dropdown-depth-3-item-arrow-hover-color);
+
+  /* accordion */
+  --accordion-text-color: var(--color-black);
+  --accordion-li-height: ;
+  --accordion-padding: 0.5em 1em;
+  --accordion-border-radius: var(--border-radius);
+
+  /* hover */
+  --accordion-hover-text-color: var(--button-hover-text-color);
+  --accordion-hover-background-color: var(--button-hover-background-color);
+
+  /* focus */
+  --accordion-focus-text-color: var(--accordion-hover-text-color);
+  --accordion-focus-background-color: var(--accordion-hover-background-color);
+
+  /* caret */
+  --accordion-caret-width: 40px;
+  --accordion-caret-height: var(--accordion-caret-width);
+  --accordion-caret-radius: var(--accordion-border-radius);
+  --accordion-caret-color: var(--button-text-color);
+  --accordion-caret-background-color: var(--button-background-color);
+
+  /* hover */
+  --accordion-caret-hover-text-color: var(--button-hover-text-color);
+  --accordion-caret-hover-background-color: var(
+    --button-hover-background-color
+  );
+
+  /* focus */
+  --accordion-caret-focus-text-color: var(--button-focus-text-color);
+  --accordion-caret-focus-background-color: var(
+    --button-focus-background-color
+  );
+
+  /* accordion details */
+  --accordion-details-text-color: var(--color-white);
+  --accordion-details-padding: var(--accordion-padding);
+
+  /* hover */
+  --accordion-details-hover-text-color: var(--accordion-caret-color);
+  --accordion-details-hover-background-color: var(
+    --accordion-caret-background-color
+  );
+
+  /* focus */
+  --accordion-details-focus-text-color: var(
+    --accordion-details-hover-text-color
+  );
+  --accordion-details-focus-background-color: var(
+    --accordion-details-hover-background-color
+  );
 }

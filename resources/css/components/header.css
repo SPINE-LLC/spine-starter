@@ -1,5 +1,5 @@
 .banner {
-  @apply sticky inset-x-0 bg-primary-500 top-(--wp-admin--admin-bar--height,0rem) hidden lg:flex z-[90] h-(--site-header-height);
+  @apply sticky inset-x-0 bg-primary-300 top-(--wp-admin--admin-bar--height,0rem) hidden lg:flex z-[90] h-(--site-header-height);
 
   .brand {
     @apply shrink p-4;
@@ -19,7 +19,7 @@
 }
 
 .compact-menu {
-  @apply fixed inset-x-0 bg-primary-500 flex lg:hidden top-(--wp-admin--admin-bar--height,0rem);
+  @apply fixed inset-x-0 bg-primary-300 flex lg:hidden top-(--wp-admin--admin-bar--height,0rem) z-[90];
 
   .brand {
     @apply shrink p-4;
@@ -27,5 +27,9 @@
 
   .open-buttons {
     @apply flex grow justify-end items-center;
+  }
+
+  .side-menu {
+    @apply bg-primary-300;
   }
 }

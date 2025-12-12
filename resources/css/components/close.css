@@ -1,0 +1,11 @@
+.close {
+  position: absolute;
+  inset-block-start: 0.4em;
+  inset-inline-end: 0.4em;
+  font-size: 1.5rem;
+  line-height: 0;
+  aspect-ratio: 1/1;
+  padding: 0.2em 0.2em 0.35em;
+  border-radius: 50%;
+  cursor: pointer;
+}

@@ -4,8 +4,7 @@
 
 /* Base dropdown trigger styles */
 :is([aria-haspopup="true"] > button, [aria-haspopup="true"] > a) {
-  background-color: transparent;
-  border: none;
+  @apply bg-transparent border-none;
   font-family: inherit;
 }
 
@@ -63,74 +62,52 @@
 
       /* Submenu container */
       > .sub-menu {
-        position: absolute;
-        min-width: var(--dropdown-depth-2-menu-min-width);
-        inset-inline-start: 50%;
-        inset-block-start: 100%;
-        transition: var(--dropdown-depth-1-menu-transition);
-        transform: var(--dropdown-depth-2-menu-transform-hidden);
-        transform-origin: top center;
-        visibility: hidden;
-        opacity: var(--dropdown-item-opacity-hidden);
-        padding: var(--dropdown-depth-2-menu-padding);
-        background-color: var(--dropdown-depth-2-menu-background-color);
-        border-radius: var(--dropdown-depth-2-menu-border-radius);
-        box-shadow: var(--dropdown-depth-2-menu-box-shadow);
+        @apply absolute min-w-(--dropdown-depth-2-menu-min-width) left-[50%] top-full transition-(--dropdown-depth-1-menu-transition) transform-(--dropdown-depth-2-menu-transform-hidden) origin-top invisible opacity-(--dropdown-item-opacity-hidden) p-(--dropdown-depth-2-menu-padding) bg-(--dropdown-depth-2-menu-background-color) rounded-(--dropdown-depth-2-menu-border-radius) shadow-(--dropdown-depth-2-menu-box-shadow) wrap-break-word;
         display: unset;
-        overflow-wrap: break-word;
 
         /* Submenu items */
         a {
-          color: var(--dropdown-depth-2-item-color);
-          display: block;
-          padding: var(--dropdown-item-padding);
-          opacity: 0;
-          transition: var(--dropdown-depth-1-menu-transition);
+          @apply text-(--dropdown-depth-2-item-color) block p-(--dropdown-item-padding) opacity-0 transition-(--dropdown-depth-1-menu-transition) font-(--dropdown-depth-2-item-font-weight) leading-(--dropdown-item-line-height);
           transition-property: opacity;
           font-size: var(--dropdown-depth-2-item-font-size);
-          font-weight: var(--dropdown-depth-2-item-font-weight);
-          line-height: var(--dropdown-item-line-height);
 
           .external svg path {
-            fill: var(--dropdown-depth-2-item-color);
-            transition: none;
+            @apply fill-(--dropdown-depth-2-item-color) transition-none;
           }
 
           /* Active state */
           &[aria-current="page"] {
-            color: var(--dropdown-depth-2-item-active-color);
-            background-color: var(--dropdown-depth-2-item-active-background);
-            .external svg path { fill: var(--dropdown-depth-2-item-active-color); }
+            @apply text-(--dropdown-depth-2-item-active-color) bg-(--dropdown-depth-2-item-active-background);
+
+            .external svg path {
+              @apply fill-(--dropdown-depth-2-item-active-color);
+            }
           }
 
           /* Hover state */
           &:hover {
-            color: var(--dropdown-depth-2-item-hover-color);
-            background-color: var(--dropdown-depth-2-item-hover-background);
-            .external svg path { fill: var(--dropdown-depth-2-item-hover-color); }
+            @apply text-(--dropdown-depth-2-item-hover-color) bg-(--dropdown-depth-2-item-hover-background);
+
+            .external svg path {
+              @apply fill-(--dropdown-depth-2-item-hover-color);
+            }
           }
 
           /* Focus state */
           &:focus {
-            color: var(--dropdown-depth-2-item-focus-color);
-            background-color: var(--dropdown-depth-2-item-focus-background);
-            .external svg path { fill: var(--dropdown-depth-2-item-focus-color); }
+            @apply text-(--dropdown-depth-2-item-focus-color) bg-(--dropdown-depth-2-item-focus-background);
+
+            .external svg path {
+              @apply fill-(--dropdown-depth-2-item-focus-color);
+            }
           }
         }
       }
 
       /* Arrow pointer */
       &::after {
-        content: "";
-        border: var(--dropdown-depth-2-menu-arrow-pointer-size) solid transparent;
+        @apply content-[""] border-[length:(--dropdown-depth-2-menu-arrow-pointer-size)] border-transparent absolute top-[calc(100%-var(--dropdown-depth-2-menu-position-offset))] left-[50%] transform-[translateX(-50%)] transition-(--dropdown-depth-1-menu-transition) opacity-0 will-change-[opacity];
         border-block-end-color: var(--dropdown-depth-2-menu-background-color);
-        position: absolute;
-        inset-block-start: calc(100% - var(--dropdown-depth-2-menu-position-offset));
-        inset-inline-start: 50%;
-        transform: translateX(-50%);
-        transition: var(--dropdown-depth-1-menu-transition);
-        opacity: 0;
-        will-change: opacity;
       }
 
       /* Active state */
@@ -151,97 +128,69 @@
         }
 
         > .sub-menu {
-          opacity: var(--dropdown-item-opacity-visible);
-          transform: var(--dropdown-depth-2-menu-transform-visible);
-          visibility: visible;
+          @apply opacity-(--dropdown-item-opacity-visible) transform-(--dropdown-depth-2-menu-transform-visible) visible;
 
           a {
-            opacity: var(--dropdown-item-opacity-visible);
+            @apply opacity-(--dropdown-item-opacity-visible);
           }
         }
 
         &::after {
-          opacity: var(--dropdown-item-opacity-visible);
+          @apply opacity-(--dropdown-item-opacity-visible);
         }
       }
     }
 
     /* Regular depth 1 items (no submenu) */
     :is(a, button):not(.button) {
-      text-decoration: none !important;
-      text-align: center;
-      display: inline-block;
-      color: var(--dropdown-depth-1-item-color);
+      @apply no-underline! text-center inline-block text-(--dropdown-depth-1-item-color) rounded-(--dropdown-depth-1-item-radius) p-(--dropdown-depth-1-item-padding) transition-(--dropdown-depth-1-menu-transition);
       font-size: var(--dropdown-depth-1-menu-font-size);
-      border-radius: var(--dropdown-depth-1-item-radius);
-      padding: var(--dropdown-depth-1-item-padding);
-      transition: var(--dropdown-depth-1-menu-transition);
 
       /* Active state */
       &[aria-current="page"] {
-        color: var(--dropdown-depth-1-item-active-color);
-        background: var(--dropdown-depth-1-item-active-background);
-        text-decoration: none;
+        @apply text-(--dropdown-depth-1-item-active-color) bg-(--dropdown-depth-1-item-active-background) no-underline;
       }
 
       /* Hover state */
       &:is(:hover, [aria-expanded="true"]) {
+        @apply text-(--dropdown-depth-1-item-hover-color) bg-(--dropdown-depth-1-item-hover-background);
         border-block-start-color: var(--color-primary-500);
-        color: var(--dropdown-depth-1-item-hover-color);
-        background: var(--dropdown-depth-1-item-hover-background);
       }
 
       /* Focus state */
       &:focus {
+         @apply text-(--dropdown-depth-1-item-focus-color) bg-(--dropdown-depth-1-item-focus-background);
         border-block-start-color: var(--color-primary-500);
-        color: var(--dropdown-depth-1-item-focus-color);
-        background: var(--dropdown-depth-1-item-focus-background);
       }
     }
 
     /* Depth 3 - Second submenu level */
     > ul {
-      grid-auto-flow: row;
+      @apply grid-flow-row;
 
       > li {
-        margin: 0;
+        @apply m-0;
 
         /* Parent items with submenus */
         &[aria-haspopup="true"] {
-          position: relative;
+          @apply relative;
 
           /* Parent item trigger */
           > :is(a, button) {
-            display: inline-flex;
-            align-items: center;
+            @apply inline-flex items-center;
 
             /* Dropdown arrow */
             &::after {
-              content: "";
-              border: var(--dropdown-depth-3-menu-arrow-size) solid transparent;
+              @apply content-[""] border-(length:--dropdown-depth-3-menu-arrow-size) border-transparent ml-(--dropdown-arrow-margin) transform-[translateX(var(--dropdown-arrow-transform-y))] inline-block;
               border-inline-start-color: var(--dropdown-depth-1-item-arrow-color);
-              margin-inline-start: var(--dropdown-arrow-margin);
-              transform: translateX(var(--dropdown-arrow-transform-y));
-              display: inline-block;
               transition: border-color var(--dropdown-depth-1-menu-transition);
             }
           }
 
           /* Submenu container */
           > .sub-menu {
-            position: absolute;
-            min-width: var(--dropdown-depth-3-menu-min-width);
-            inset-inline-start: 50%;
-            inset-block-start: var(--dropdown-depth-3-menu-position-start);
-            transition: var(--dropdown-depth-1-menu-transition);
-            transform: var(--dropdown-depth-3-menu-transform-hidden);
+            @apply absolute min-w-(--dropdown-depth-3-menu-min-width) left-[50%] top-(--dropdown-depth-3-menu-position-start) transition-(--dropdown-depth-1-menu-transition) transform-(--dropdown-depth-3-menu-transform-hidden) invisible opacity-(--dropdown-item-opacity-hidden) p-(--dropdown-depth-3-menu-padding) bg-(--dropdown-depth-3-menu-background-color) rounded-(--dropdown-depth-3-menu-border-radius) shadow-(--dropdown-depth-3-menu-box-shadow);
             transform-origin: top center;
-            visibility: hidden;
-            opacity: var(--dropdown-item-opacity-hidden);
-            padding: var(--dropdown-depth-3-menu-padding);
-            background-color: var(--dropdown-depth-3-menu-background-color);
-            border-radius: var(--dropdown-depth-3-menu-border-radius);
-            box-shadow: var(--dropdown-depth-3-menu-box-shadow);
 
             /* Submenu items */
             a {
