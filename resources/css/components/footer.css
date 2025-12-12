@@ -2,11 +2,35 @@
   @apply bg-primary-900 text-white;
 
   .content {
-    @apply max-w-(--wp--style--global--wide-size) mx-auto p-10;
+    @apply flex flex-col gap-8 max-w-(--wp--style--global--wide-size) mx-auto p-10;
 
     :last-child {
       @apply mb-0;
     }
+  }
+
+  .top {
+    @apply flex justify-between;
+  }
+
+  .information {
+    @apply flex flex-col gap-2;
+  }
+
+  .nav-footer {
+
+  }
+
+  .nav-social {
+
+  }
+
+  .bottom {
+    @apply flex flex-col gap-4 items-center justify-between;
+  }
+
+  .nav-footer {
+    @apply text-right;
   }
 
   .copyright {

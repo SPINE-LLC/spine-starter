@@ -20,7 +20,6 @@
   --dropdown-external-size: 12px;
   --dropdown-arrow-margin: 0.25em;
   --dropdown-arrow-transform-y: calc(50% - 3px);
-  --dropdown-pointer-events: none;
 
   /* dropdown depth 1 menu */
   --dropdown-depth-1-menu-color: var(--color-black);

@@ -90,7 +90,7 @@ function compact_nav() {
 function footer_nav() {
     return wp_nav_menu([
         'theme_location' => 'footer_navigation',
-        'menu_class' => 'nav',
+        'menu_class' => 'nav vertical',
         'depth' => 1,
         'echo' => false,
     ]);
