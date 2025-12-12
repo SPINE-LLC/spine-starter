@@ -1,7 +1,7 @@
 .wp-block-separator {
-  max-width: calc(var(--wp--style--global--content-size) - 12.5rem);
+  @apply max-w-[calc(var(--wp--style--global--content-size)-12.5rem)];
 
   &.is-style-wide {
-    max-width: var(--wp--style--global--content-size);
+    @apply max-w-(--wp--style--global--content-size);
   }
 }
