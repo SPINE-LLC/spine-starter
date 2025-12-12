@@ -1,0 +1,15 @@
+.content-info {
+  @apply bg-primary-900 text-white;
+
+  .content {
+    @apply max-w-(--wp--style--global--wide-size) mx-auto p-10;
+
+    :last-child {
+      @apply mb-0;
+    }
+  }
+
+  .copyright {
+    @apply text-center;
+  }
+}
