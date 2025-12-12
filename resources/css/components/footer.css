@@ -2,7 +2,7 @@
   @apply bg-primary-900 text-white;
 
   .content {
-    @apply flex flex-col gap-8 max-w-(--wp--style--global--wide-size) mx-auto p-10;
+    @apply flex flex-col gap-20 max-w-(--wp--style--global--wide-size) mx-auto p-10;
 
     :last-child {
       @apply mb-0;
@@ -10,19 +10,19 @@
   }
 
   .top {
-    @apply flex justify-between;
+    @apply flex justify-between flex-col sm:flex-row gap-4;
+  }
+
+  .logo {
+    @apply flex justify-center sm:justify-start;
   }
 
   .information {
-    @apply flex flex-col gap-2;
-  }
-
-  .nav-footer {
-
+    @apply flex flex-col gap-8 justify-between;
   }
 
   .nav-social {
-
+    @apply flex gap-4 justify-center sm:justify-end;
   }
 
   .bottom {
@@ -30,7 +30,13 @@
   }
 
   .nav-footer {
-    @apply text-right;
+    @apply text-center sm:text-right;
+  }
+
+  .nav-privacy {
+    .nav {
+      @apply flex-col sm:flex-row text-center sm:text-left;
+    }
   }
 
   .copyright {

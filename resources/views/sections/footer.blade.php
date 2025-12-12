@@ -6,7 +6,9 @@
     <div class="top">
       @if($logo_id)
         <div class="logo">
-          {!! wp_get_attachment_image($logo_id, ['',260]) !!}
+          <a href="{{ home_url('/') }}" rel="home"{{ is_front_page() ? ' aria-current="page"' : '' }}>
+            {!! wp_get_attachment_image($logo_id, ['',260]) !!}
+          </a>
         </div>
       @endif
 
@@ -15,8 +17,13 @@
           <nav class="nav-footer" aria-label="{{ wp_get_nav_menu_name('footer_navigation') }}">
             {!! \App\footer_nav() !!}
           </nav>
-        </div>
-      @endif
+        @endif
+        @if( App\has_social_links() )
+          <nav class="nav-social" aria-label="Social Media">
+            @include('partials.social')
+          </nav>
+        @endif
+      </div>
     </div>
 
     <div class="bottom">
