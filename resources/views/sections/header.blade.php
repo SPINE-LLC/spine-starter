@@ -1,5 +1,5 @@
 <header id="masthead" class="banner">
-  <a id="main-brand" class="brand" href="{{ home_url('/') }}">
+  <a id="main-brand" class="brand" href="{{ home_url('/') }}" rel="home"{{ is_front_page() ? ' aria-current="page"' : '' }}>
     @if (has_custom_logo())
       {!! wp_get_attachment_image(get_theme_mod('custom_logo'), ['',56]) !!}
     @else
