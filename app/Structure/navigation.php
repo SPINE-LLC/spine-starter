@@ -45,7 +45,7 @@ function primary_nav() {
 function primary_btns_nav() {
 	return wp_nav_menu([
 		'theme_location' => 'primary_buttons',
-		'menu_class' => 'nav button-nav',
+		'menu_class' => 'nav button-nav wp-block-buttons',
 		'depth' => 1,
 		'echo' => false,
 		'walker' => new \App\Walker\Button_Walker_Nav_Menu()
@@ -60,7 +60,7 @@ function primary_btns_nav() {
 function compact_btns_nav() {
 	return wp_nav_menu(array(
 		'theme_location' => 'compact_buttons',
-		'menu_class' => 'nav button-nav',
+		'menu_class' => 'nav button-nav wp-block-buttons',
 		'depth' => 1,
 		'echo' => false,
 		'walker' => new \App\Walker\Button_Walker_Nav_Menu()

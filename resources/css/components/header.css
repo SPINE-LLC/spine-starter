@@ -11,12 +11,6 @@
 
   .nav {
     @apply justify-end p-4;
-
-    &.button-nav {
-      .button {
-        @apply bg-secondary-500 hover:bg-secondary-800 focus:bg-secondary-800 rounded-lg;
-      }
-    }
   }
 }
 

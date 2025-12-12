@@ -24,6 +24,7 @@ class Button_Walker_Nav_Menu extends \Walker_Nav_Menu {
 
 		$classes   = empty( $item->classes ) ? array() : (array) $item->classes;
 		$classes[] = 'menu-item-' . $item->ID;
+		$classes[] = 'wp-block-button';
 
 		/**
 		 * Filter the arguments for a single nav menu item.
@@ -47,8 +48,7 @@ class Button_Walker_Nav_Menu extends \Walker_Nav_Menu {
 		 * @param array  $args    An array of {@see wp_nav_menu()} arguments.
 		 * @param int    $depth   Depth of menu item. Used for padding.
 		 */
-		//$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
-		$class_names = ''; // Remove default classes
+		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
 		$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . '"' : '';
 
 		/**
@@ -66,7 +66,7 @@ class Button_Walker_Nav_Menu extends \Walker_Nav_Menu {
 		$id = $id ? ' id="' . esc_attr( $id ) . '"' : '';
 
 		$output .= sprintf(
-			'',
+			'%s<li%s%s%s>',
 			$indent,
 			$id,
 			$class_names,
@@ -151,6 +151,6 @@ class Button_Walker_Nav_Menu extends \Walker_Nav_Menu {
 	}
 
 	public function end_el( &$output, $item, $depth = 0, $args = array() ) {
-		$output .= "\n";
+		$output .= "</li>\n";
 	}
 }

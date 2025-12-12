@@ -12,3 +12,12 @@
     }
   }
 }
+
+/* site banner button */
+.banner {
+  .button-nav {
+    .wp-block-wp-block-button__link {
+      @apply bg-secondary-500 text-black hover:bg-secondary-800 focus:bg-secondary-800 hover:text-white focus:text-white rounded-lg;
+    }
+  }
+}
