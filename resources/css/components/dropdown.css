@@ -11,73 +11,52 @@
 
 /* Main dropdown menu container */
 .nav.is-dropdown {
+  @apply grid grid-flow-col items-center font-(--dropdown-depth-1-menu-font-weight) bg-(--dropdown-depth-1-menu-background-color) rounded-(--dropdown-depth-1-menu-radius) p-(--dropdown-depth-1-menu-padding) gap-(--dropdown-depth-1-menu-gap);
   font-family: var(--dropdown-depth-1-menu-font-family);
-  font-weight: var(--dropdown-depth-1-menu-font-weight);
-  background-color: var(--dropdown-depth-1-menu-background-color);
-  border-radius: var(--dropdown-depth-1-menu-radius);
-  padding: var(--dropdown-depth-1-menu-padding);
-  display: grid;
-  grid-auto-flow: column;
-  align-items: center;
-  gap: var(--dropdown-depth-1-menu-gap);
-  list-style: none;
-  margin-block-end: 0;
 
   /* Reset list styles */
   ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
+    @apply list-none m-0 p-0 grid;
 
     li {
-      padding: 0;
-      break-inside: avoid;
-      margin-block-end: 0;
+      @apply p-0 break-inside-avoid mb-0;
 
       /* External link icons */
       a .external {
-        margin-inline-start: var(--dropdown-external-margin);
-        width: var(--dropdown-external-size);
-        height: var(--dropdown-external-size);
-        display: inline-flex;
+        @apply inline-flex ms-(--dropdown-external-margin) w-(--dropdown-external-size) h-(--dropdown-external-size);
 
         svg path {
-          fill: var(--dropdown-depth-1-menu-color);
-          transition: var(--dropdown-depth-1-menu-transition);
+          @apply fill-(--dropdown-depth-1-menu-color) transition-(--dropdown-depth-1-menu-transition);
         }
       }
 
       /* External link hover/focus states */
       a:is(:hover, :focus, [aria-expanded="true"]) .external svg path {
-        fill: var(--dropdown-depth-1-item-hover-color);
+        @apply fill-(--dropdown-depth-1-item-hover-color);
       }
     }
   }
 
   /* Depth 1 - Main menu level */
   > li {
-    margin-block-end: 0;
 
     /* Parent items with submenus */
     &[aria-haspopup="true"] {
-      position: relative;
+      @apply relative;
 
       /* Parent item trigger */
       > :is(a, button):not(.button) {
-        display: inline-flex;
-        align-items: center;
+        @apply inline-flex items-center;
         transition-property: opacity, transform;
+        transition-duration: 280ms;
+        transition-timing-function: ease-out;
+        transition-delay: 120ms;
 
         /* Dropdown arrow */
         &::after {
           content: "";
-          border: var(--dropdown-depth-2-menu-arrow-size) solid transparent;
+          @apply border-(length:--dropdown-depth-2-menu-arrow-size) border-transparent ms-(--dropdown-arrow-margin) transform-[translateY(var(--dropdown-arrow-transform-y))] inline-block pointer-events-none;
           border-block-start-color: var(--dropdown-depth-1-item-arrow-color);
-          margin-inline-start: var(--dropdown-arrow-margin);
-          transform: translateY(var(--dropdown-arrow-transform-y));
-          display: inline-block;
-          pointer-events: var(--dropdown-pointer-events);
           transition: border-color var(--dropdown-depth-1-menu-transition);
         }
       }
@@ -152,7 +131,6 @@
         transition: var(--dropdown-depth-1-menu-transition);
         opacity: 0;
         will-change: opacity;
-        pointer-events: var(--dropdown-pointer-events);
       }
 
       /* Active state */
@@ -267,48 +245,30 @@
 
             /* Submenu items */
             a {
-              color: var(--dropdown-depth-3-item-color);
-              display: block;
-              padding: var(--dropdown-item-padding);
-              opacity: 0;
-              transition: var(--dropdown-depth-1-menu-transition);
+              @apply text-(--dropdown-depth-3-item-color) block p-(--dropdown-item-padding) opacity-0 transition-(--dropdown-depth-1-menu-transition) text-(length:--dropdown-depth-3-item-font-size) font-(--dropdown-depth-3-item-font-weight);
               transition-property: opacity;
-              font-size: var(--dropdown-depth-3-item-font-size);
-              font-weight: var(--dropdown-depth-3-item-font-weight);
 
               /* Active state */
               &[aria-current="page"] {
-                color: var(--dropdown-depth-3-item-active-color);
-                background-color: var(--dropdown-depth-3-item-active-background);
+                @apply text-(--dropdown-depth-3-item-active-color) bg-(--dropdown-depth-3-item-active-background);
               }
 
               /* Hover state */
               &:hover {
-                color: var(--dropdown-depth-3-item-hover-color);
-                background-color: var(--dropdown-depth-3-item-hover-background);
+                @apply text-(--dropdown-depth-3-item-hover-color) bg-(--dropdown-depth-3-item-hover-background);
               }
 
               /* Focus state */
               &:focus {
-                color: var(--dropdown-depth-3-item-focus-color);
-                background-color: var(--dropdown-depth-3-item-focus-background);
+                @apply text-(--dropdown-depth-3-item-focus-color) bg-(--dropdown-depth-3-item-focus-background);
               }
             }
           }
 
           /* Arrow pointer */
           &::after {
-            content: "";
-            border: var(--dropdown-depth-3-menu-arrow-pointer-size) solid transparent;
+            @apply content-[""] border-(length:--dropdown-depth-3-menu-arrow-pointer-size) border-transparent absolute top-[calc(100%-var(--dropdown-depth-3-menu-position-offset))] left-[calc(100%+1.13rem)] transform-[translateX(-150%)] transition-(--dropdown-depth-1-menu-transition) opacity-0 will-change-[opacity];
             border-inline-end-color: var(--dropdown-depth-3-menu-background-color);
-            position: absolute;
-            inset-block-start: calc(100% - var(--dropdown-depth-3-menu-position-offset));
-            inset-inline-start: calc(100% + 1.13rem);
-            transform: translateX(-150%);
-            transition: var(--dropdown-depth-1-menu-transition);
-            opacity: 0;
-            will-change: opacity;
-            pointer-events: var(--dropdown-pointer-events);
           }
 
           /* Active state */
@@ -329,17 +289,15 @@
             }
 
             > .sub-menu {
-              opacity: var(--dropdown-item-opacity-visible);
-              transform: var(--dropdown-depth-3-menu-transform-visible);
-              visibility: visible;
+              @apply opacity-(--dropdown-item-opacity-visible) transform-(--dropdown-depth-3-menu-transform-visible) visible;
 
               a {
-                opacity: var(--dropdown-item-opacity-visible);
+                @apply opacity-(--dropdown-item-opacity-visible);
               }
             }
 
             &::after {
-              opacity: var(--dropdown-item-opacity-visible);
+              @apply opacity-(--dropdown-item-opacity-visible);
             }
           }
         }
