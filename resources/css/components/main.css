@@ -1,0 +1,3 @@
+.main {
+  @apply sm:pt-(--compact-header-height) lg:pt-(--site-header-height);
+}
