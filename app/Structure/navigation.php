@@ -82,3 +82,31 @@ function compact_nav() {
 	]);
 }
 
+/**
+ * Footer navigation menu function.
+ *
+ * @return string
+ */
+function footer_nav() {
+    return wp_nav_menu([
+        'theme_location' => 'footer_navigation',
+        'menu_class' => 'nav',
+        'depth' => 1,
+        'echo' => false,
+    ]);
+}
+
+/**
+ * Privacy navigation menu function.
+ *
+ * @return string
+ */
+function privacy_nav() {
+    return wp_nav_menu([
+        'theme_location' => 'privacy_navigation',
+        'menu_class' => 'nav',
+        'depth' => 1,
+        'echo' => false,
+    ]);
+}
+
