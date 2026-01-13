@@ -1,5 +1,5 @@
 dialog {
-  @apply m-auto p-4 w-3/4 h-3/4 max-w-full max-h-full lg:hidden;
+  @apply m-auto p-4 w-3/4 h-3/4 max-w-full max-h-full;
 
   &.is-fit {
     @apply p-0;
