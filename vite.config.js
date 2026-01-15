@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import laravel from 'laravel-vite-plugin';
 import { wordpressPlugin, wordpressThemeJson } from '@roots/vite-plugin';
+import postcssCustomMedia from 'postcss-custom-media';
 
 export default defineConfig({
   base: '/app/themes/sage/public/build/',
@@ -33,6 +34,11 @@ export default defineConfig({
       disableTailwindFontSizes: false,
     }),
   ],
+  css: {
+    postcss: {
+      plugins: [postcssCustomMedia()],
+    },
+  },
   resolve: {
     alias: {
       '@scripts': '/resources/js',
