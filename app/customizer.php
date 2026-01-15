@@ -135,20 +135,20 @@ add_action(
 
 		// Snapchat URL
 		$wp_customize->add_setting(
-		    'organization_sc_url',
-		    array(
-		        'default'           => '',
-		        'sanitize_callback' => 'esc_url_raw',
-		    )
+			'organization_sc_url',
+			array(
+				'default'           => '',
+				'sanitize_callback' => 'esc_url_raw',
+			)
 		);
 
 		$wp_customize->add_control(
-		    'organization_sc_url',
-		    array(
-		        'label'   => __( 'Snapchat URL', 'sage' ),
-		        'section' => 'organization',
-		        'type'    => 'url',
-		    )
+			'organization_sc_url',
+			array(
+				'label'   => __( 'Snapchat URL', 'sage' ),
+				'section' => 'organization',
+				'type'    => 'url',
+			)
 		);
 	}
 );
