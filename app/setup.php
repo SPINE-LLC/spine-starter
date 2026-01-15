@@ -6,10 +6,11 @@
 
 namespace App;
 
-require_once __DIR__ . '/Walker/AriaWalkerNavMenu.php';
-require_once __DIR__ . '/Walker/AccordionWalkerNavMenu.php';
-require_once __DIR__ . '/Walker/ButtonWalkerNavMenu.php';
+require_once __DIR__ . '/Walker/Aria_Walker_Nav_Menu.php';
+require_once __DIR__ . '/Walker/Accordion_Walker_Nav_Menu.php';
+require_once __DIR__ . '/Walker/Button_Walker_Nav_Menu.php';
 require_once __DIR__ . '/Structure/navigation.php';
+require_once __DIR__ . '/Structure/detect-vertical-positions.php';
 
 use Illuminate\Support\Facades\Vite;
 

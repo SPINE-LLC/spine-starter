@@ -24,7 +24,7 @@ class Button_Walker_Nav_Menu extends \Walker_Nav_Menu {
 
 		$classes   = empty( $item->classes ) ? array() : (array) $item->classes;
 		$classes[] = 'menu-item-' . $item->ID;
-		$classes[] = 'wp-block-button';
+		$classes[] = 'wp-block-button is-style-secondary';
 
 		/**
 		 * Filter the arguments for a single nav menu item.
