@@ -4,8 +4,8 @@
   "version": 3,
   "settings": {
     "layout": {
-      "contentSize": "48rem",
-      "wideSize": "64rem"
+      "contentSize": "56.25rem",
+      "wideSize": "90rem"
     },
     "background": {
       "backgroundImage": true
@@ -36,6 +36,9 @@
     "typography": {
       "defaultFontSizes": false,
       "customFontSize": false
+    },
+    "border": {
+      "radius": true
     }
   }
 }
