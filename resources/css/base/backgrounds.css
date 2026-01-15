@@ -41,5 +41,18 @@
   .has-error-950-background-color
 ) {
   @apply text-white;
+
+  label {
+    @apply text-inherit;
+  }
 }
 
+:where(
+  .has-white-background-color
+) {
+  @apply text-black;
+
+  label {
+    @apply text-inherit;
+  }
+}

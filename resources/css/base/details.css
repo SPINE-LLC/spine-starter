@@ -1,0 +1,15 @@
+:root {
+  interpolate-size: allow-keywords;
+}
+
+::details-content {
+  @apply h-0 overflow-clip transition-[height] duration-200 ease-in-out;
+}
+
+details {
+  &[open] {
+    &::details-content {
+      @apply h-auto;
+    }
+  }
+}

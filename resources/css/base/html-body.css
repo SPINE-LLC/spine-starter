@@ -1,5 +1,6 @@
 html {
   @apply scroll-smooth;
+  container-type: scroll-state;
 }
 
 /* offsets anchor links so they don't fall behind the site header */

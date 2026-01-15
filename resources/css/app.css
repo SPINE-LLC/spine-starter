@@ -7,8 +7,10 @@
 
 /* base */
 @layer base {
+  @import './base/admin-bar.css';
   @import './base/variables.css';
   @import './base/html-body.css';
+  @import './base/details.css';
   @import './base/typography.css';
   @import './base/dialog.css';
   @import './base/nav.css';

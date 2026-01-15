@@ -5,8 +5,10 @@
 
 /* base */
 @layer base {
+  @import './base/admin-bar.css';
   @import './base/variables.css';
   @import './base/html-body.css';
+  @import './base/details.css';
   @import './base/typography.css';
   @import './base/dialog.css';
   @import './base/nav.css';
@@ -17,12 +19,13 @@
 /* components */
 @layer components {
   @import './components/header.css';
+  @import './components/main.css';
   @import './components/footer.css';
   @import './components/dropdown.css';
   @import './components/accordion.css';
   @import './components/close.css';
 }
 
-/* blocks */
+/* blocks - not in a layer so that it can override WP */
 @import './blocks/button.css';
 @import './blocks/separator.css';
