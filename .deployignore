@@ -1,0 +1,59 @@
+# Note: In the Github Actions deployment this file gets converted into an rsync
+# filter format. It's updated in the following order, line by line, before
+# being sent to the rsync in the '--filter="merge {filters}"' option:
+#   1. If a line is a comment or empty, remove it and continue
+#   2. If a line starts with a '!', change it to '+' and continue
+#   3. If a line starts with a 'P', don't change it and continue
+#   4. If a line doesn't match any of the above, prefix it with '-' and continue
+# See 'FILTER RULES' for more details on the rsync filters:
+#   https://linux.die.net/man/1/rsync
+
+# Standard System tmp files/folders
+*~
+.DS_Store
+.htaccess
+.svn
+.cvs
+*.bak
+*.log
+*.swp
+.tmb
+.quarantine
+Thumbs.db
+tmp
+
+# Theme/Plugin Specific
+.ackrc
+.deployignore
+.editorconfig
+.env
+.env.sample
+.git
+.gitattributes
+.github
+.github/**
+.gitignore
+.gitkeep
+.kilocode
+.npmrc
+.vscode
+.idea
+AI_GUIDELINES.md
+bs-config.mjs
+change-theme.js
+eslint.config.js
+id_rsa
+LICENSE
+LICENSE.md
+node_modules
+npm-debug.log
+package-lock.json
+package.json
+phpcs.xml.dist
+pnpm-lock.yaml
+README.md
+README
+vite.config.js
+vite.dev.json
+yarn.lock
+bun.lock
