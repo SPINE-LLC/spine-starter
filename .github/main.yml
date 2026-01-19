@@ -1,0 +1,407 @@
+name: Main
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'rebuild/prod/**'
+  pull_request:
+    branches:
+      - main
+
+env:
+  THEME_NAME:
+  CLOUDWAYS_APP_ID:
+  CLOUDWAYS_SERVER_ID:
+  BUILD_RELEASE: true
+
+jobs:
+  node:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    strategy:
+      matrix:
+        node: ['20']
+
+    steps:
+      - name: Checkout the project
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup the Node ${{ matrix.node }} environment on ${{ runner.os }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies using pnpm
+        run: pnpm install
+
+      - name: Build and compile assets
+        run: |
+          pnpm run build
+          cat public/build/manifest.json
+
+      - name: Validate theme.json
+        run: |
+          THEME_JSON="public/build/assets/theme.json"
+
+          if [ ! -f "$THEME_JSON" ]; then
+            echo "❌ theme.json not found"
+            exit 1
+          fi
+
+          jq -e '
+            (.settings.color.palette | length > 0) and
+            (.settings.typography.fontFamilies | length > 0) and
+            (.settings.typography.fontSizes | length > 0)
+          ' "$THEME_JSON" 2>&1 || {
+            echo "❌ Invalid theme.json structure or missing required values"
+            exit 1
+          }
+
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    strategy:
+      matrix:
+        php: ['8.4']
+
+    steps:
+      - name: Checkout the project
+        uses: actions/checkout@v4
+
+      - name: Setup the PHP ${{ matrix.php }} environment on ${{ runner.os }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore the Composer cache directory
+        id: composercache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: ${{ runner.os }}-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.php }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader --no-suggest
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci skip]')
+    needs: [node, php]
+    steps:
+      - name: Checkout branch history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compile list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          since_last_remote_commit: true
+          files_ignore_from_source_file: .deployignore
+          write_output_files: true
+
+      - name: Check for changes in theme resources directory
+        id: theme-src-changes
+        run: |
+          # Get all changed files
+          ALL_CHANGED="${{ steps.changed-files.outputs.all_modified_files }}"
+
+          # Initialize counter for resources changes
+          SRC_CHANGES=0
+          SRC_FILES=""
+
+          # Check each file to see if it's in the theme resources directory
+          for file in $ALL_CHANGED; do
+            if [[ $file == resources/* ]]; then
+              SRC_CHANGES=$((SRC_CHANGES + 1))
+              SRC_FILES="$SRC_FILES $file"
+              echo "Theme resources file changed: $file"
+            fi
+          done
+
+          # Set output variables
+          echo "src_changes_count=$SRC_CHANGES" >> $GITHUB_OUTPUT
+          echo "src_files_changed=$SRC_FILES" >> $GITHUB_OUTPUT
+
+          # Determine if any resources files changed
+          if [[ $SRC_CHANGES -gt 0 ]]; then
+            echo "src_files_changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected in theme resources directory"
+          else
+            echo "src_files_changed=false" >> $GITHUB_OUTPUT
+            echo "❌ No changes in theme resources directory"
+          fi
+
+      - name: Setup PHP (if deploy is necessary)
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+          coverage: none
+
+      - name: Run Composer (if deploy is necessary)
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: "--no-dev --prefer-dist"
+
+      - name: Setup PNPM (if build is necessary)
+        if: ${{ steps.theme-src-changes.outputs.src_files_changed == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        uses: pnpm/action-setup@v3
+        id: pnpm-install
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node w/PNPM cache (if build is necessary)
+        if: ${{ steps.theme-src-changes.outputs.src_files_changed == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+
+      - name: Install PNPM Dependencies (if build is necessary)
+        if: ${{ steps.theme-src-changes.outputs.src_files_changed == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run PNPM build (if build is necessary)
+        if: ${{ steps.theme-src-changes.outputs.src_files_changed == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        run: pnpm run build
+
+      - name: Get Cloudways server details (if deploy is necessary)
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        id: cw-server
+        run: |
+          # get access token
+          TOKEN=$(curl -X POST https://api.cloudways.com/api/v1/oauth/access_token \
+            -d "email=sdev@alignideas.com" \
+            -d "api_key=${{ secrets.CLOUDWAYS_API_KEY }}" | jq -r '.access_token')
+          SERVER=$(curl -X GET https://api.cloudways.com/api/v1/server \
+            -H "Authorization: Bearer $TOKEN" | jq -c '.servers[] | select(.id == "${{ env.CLOUDWAYS_SERVER_ID }}")')
+          echo "server_user=$(echo $SERVER | jq -rc '.master_user')" >> $GITHUB_OUTPUT
+          echo "server_ip=$(echo $SERVER | jq -rc '.public_ip')" >> $GITHUB_OUTPUT
+          echo "server_path=/home/master/applications/$(echo $SERVER | jq -rc '.apps[] | select(.id == "${{ env.CLOUDWAYS_APP_ID }}") | .symlink')/public_html/wp-content/themes/${{ env.THEME_NAME }}/" >> $GITHUB_OUTPUT
+
+          echo "server_name=$(echo $SERVER | jq -rc '.label')" >> $GITHUB_OUTPUT
+          echo "app_name=$(echo $SERVER | jq -rc '.apps[] | select(.id == "${{ env.CLOUDWAYS_APP_ID }}") | .label')" >> $GITHUB_OUTPUT
+          # echo "app_url=$(echo $SERVER | jq -rc '.apps[] | select(.id == "${{ env.CLOUDWAYS_APP_ID }}") | .cname')" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH keys (if deploy is necessary)
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        id: ssh-setup
+        run: |
+          mkdir -p $HOME/.ssh
+
+          # Create SSH config for jump host
+          echo "Host jumphost
+            HostName ${{ secrets.PROXY_SERVER_IP }}
+            User ${{ secrets.PROXY_SERVER_USER }}
+            IdentityFile $HOME/.ssh/jump_key
+            StrictHostKeyChecking no
+          Host destination
+            HostName ${{ steps.cw-server.outputs.server_ip }}
+            User ${{ steps.cw-server.outputs.server_user }}
+            ProxyJump jumphost
+            IdentityFile $HOME/.ssh/dest_key
+            StrictHostKeyChecking no" > $HOME/.ssh/config
+
+          # Create the SSH keys from secrets
+          echo "${{ secrets.PROXY_SERVER_SSH_KEY }}" > $HOME/.ssh/jump_key
+          echo "${{ secrets.CLOUDWAYS_SSH_KEY }}" > $HOME/.ssh/dest_key
+
+          # Set permissions
+          chmod 600 $HOME/.ssh/jump_key $HOME/.ssh/dest_key
+          chmod 600 $HOME/.ssh/config
+
+          echo "ssh_config_path=$HOME/.ssh/config" >> $GITHUB_OUTPUT
+
+      - name: Convert deployignore to rsync filter format (if deploy is necessary)
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        id: create-filter
+        run: |
+          # Convert .deployignore to rsync filter format
+          echo "# rsync filter rules converted from .deployignore" > rsync_filter
+
+          while IFS= read -r pattern || [[ -n "$pattern" ]]; do
+            # Skip comments and empty lines
+            [[ "$pattern" =~ ^#.*$ ]] || [[ -z "$pattern" ]] && continue
+
+            # Handle negation (! prefix in git becomes + in rsync)
+            if [[ "$pattern" == !* ]]; then
+              echo "+ ${pattern:1}" >> rsync_filter
+              continue
+            fi
+
+            # Handle protection
+            if [[ "$pattern" == P* ]]; then
+              echo "P${pattern:1}" >> rsync_filter
+              continue
+            fi
+
+            # Convert ** wildcard
+            pattern="${pattern//\*\*/***}"
+
+            # Add trailing slash for directories if not present and if they exist
+            if [[ -d "$pattern" ]] && [[ "$pattern" != */ ]]; then
+              pattern="${pattern}/"
+            fi
+
+            # Add the exclude rule (with - prefix)
+            echo "- $pattern" >> rsync_filter
+          done < .deployignore
+
+          # Add exclude this file
+          echo "- rsync_filter" >> rsync_filter
+
+          # Add default include rule at the end
+          echo "+ *" >> rsync_filter
+
+          # Debug rsync filter
+          echo -e "$(cat rsync_filter)"
+
+          echo "filter_path=./rsync_filter" >> $GITHUB_OUTPUT
+
+      - name: Deploy via Rsync (if deploy is necessary)
+        id: rsync
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        run: |
+          rsync_output=$(rsync -az --no-times --checksum --delete  --out-format="%o:%f" --stats --filter="merge ${{ steps.create-filter.outputs.filter_path }}" \
+            -e "ssh -F ${{ steps.ssh-setup.outputs.ssh_config_path }}" \
+            --chmod=D775,F664 \
+            ./ destination:${{ steps.cw-server.outputs.server_path }})
+          echo -e "$rsync_output"
+          files_transferred=$(echo "$rsync_output" | grep "Number of regular files transferred:" | sed -E 's/[^0-9]*([0-9]+).*/\1/')
+          files_created=$(echo "$rsync_output" | grep "Number of created files:" | sed -E 's/[^0-9]*([0-9]+).*/\1/')
+          files_deleted=$(echo "$rsync_output" | grep "Number of deleted files:" | sed -E 's/[^0-9]*([0-9]+).*/\1/')
+          files_transferred=${files_transferred:-0}
+          files_created=${files_created:-0}
+          files_deleted=${files_deleted:-0}
+          # echo "files_transferred=$files_transferred" >> $GITHUB_OUTPUT
+          # echo "files_created=$files_created" >> $GITHUB_OUTPUT
+          # echo "files_deleted=$files_deleted" >> $GITHUB_OUTPUT
+
+          output_parts=()
+          if [ "$files_transferred" -gt 0 ]; then
+            output_parts+=("${files_transferred} files changed")
+          fi
+          if [ -n "$files_created" ] && [ "$files_created" -gt 0 ]; then
+            output_parts+=("${files_created} files added")
+          fi
+          if [ -n "$files_deleted" ] && [ "$files_deleted" -gt 0 ]; then
+            output_parts+=("${files_deleted} files deleted")
+          fi
+          if [ ${#output_parts[@]} -eq 0 ]; then
+            output="no changes"
+            # echo "any_changed='false'" >> $GITHUB_OUTPUT
+          else
+            output=$(printf "%s, " "${output_parts[@]}")
+            output=${output%, }
+            # echo "any_changed='true'" >> $GITHUB_OUTPUT
+          fi
+          echo -e "$output"
+          echo "result=$output" >> $GITHUB_OUTPUT
+
+      - name: Get Github Repo icon
+        id: repo-icon
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const repo_website_url = repo.data.homepage;
+            if(!repo_website_url) return '';
+            const icon_request_url = "https://www.google.com/s2/favicons?domain="+ repo_website_url +"&sz=128"
+            try {
+              const icon_request_result = await fetch(icon_request_url, { method: "GET", redirect: "follow" });
+              return icon_request_result.url;
+            } catch (error) {
+              return '';
+            }
+
+      - name: Slack Notification (Updates Made)
+        if: ${{ !startsWith(github.ref, 'refs/tags/rebuild') && success() && steps.changed-files.outputs.any_modified == 'true' }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "${{ github.event.repository.name }} | Github Actions Deployment"
+          SLACK_MSG_AUTHOR: ${{ github.actor }}
+          SLACK_ICON: ${{ steps.repo-icon.outputs.result != '' && steps.repo-icon.outputs.result || 'https://github.com/SPINE-LLC.png?size=128' }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_TITLE: "Commit Message:"
+          SLACK_FOOTER: "Deployed to ${{ steps.cw-server.outputs.app_name }} on ${{ steps.cw-server.outputs.server_name }} \nServer IP/Server Path: ${{ steps.cw-server.outputs.server_ip }} / ${{ steps.cw-server.outputs.server_path }}) \nRsync: ${{ steps.rsync.outputs.result }}"
+          MSG_MINIMAL: actions url,commit,ref
+
+      - name: Slack Notification (Updates Not Deployed)
+        if: ${{ !startsWith(github.ref, 'refs/tags/rebuild') && success() && steps.changed-files.outputs.any_modified == 'false' }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "${{ github.event.repository.name }} | Github Actions Deployment"
+          SLACK_MSG_AUTHOR: ${{ github.actor }}
+          SLACK_ICON: ${{ steps.repo-icon.outputs.result != '' && steps.repo-icon.outputs.result || 'https://github.com/SPINE-LLC.png?size=128' }}
+          SLACK_COLOR: "#cccccc"
+          SLACK_TITLE: "Updates Not Deployed:"
+          SLACK_FOOTER: "No updates were found in the repo that would trigger a deployment."
+          MSG_MINIMAL: actions url,commit,ref
+
+      - name: Slack Notification (Failed)
+        if: ${{ !startsWith(github.ref, 'refs/tags/rebuild') && failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "${{ github.event.repository.name }} | Github Actions Deployment"
+          SLACK_MSG_AUTHOR: ${{ github.actor }}
+          SLACK_ICON: ${{ steps.repo-icon.outputs.result != '' && steps.repo-icon.outputs.result || 'https://github.com/SPINE-LLC.png?size=128' }}
+          SLACK_COLOR: "#f2777a"
+          SLACK_TITLE: "Deploy Failed:"
+          SLACK_FOOTER: "Deployment failed, check Actions URL to see logs."
+          MSG_MINIMAL: actions url,commit,ref
+
+      - name: Slack Notification (Forced Rebuild)
+        if: ${{ startsWith(github.ref, 'refs/tags/rebuild') && success() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "${{ github.event.repository.name }} | Github Actions Deployment"
+          SLACK_MSG_AUTHOR: ${{ github.actor }}
+          SLACK_ICON: ${{ steps.repo-icon.outputs.result != '' && steps.repo-icon.outputs.result || 'https://github.com/SPINE-LLC.png?size=128' }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_TITLE: "Forced Rebuild & Updated Deployed"
+          SLACK_FOOTER: "Deployed to ${{ steps.cw-server.outputs.app_name }} on ${{ steps.cw-server.outputs.server_name }} \nServer IP/Server Path: ${{ steps.cw-server.outputs.server_ip }} / ${{ steps.cw-server.outputs.server_path }} \nRsync: ${{ steps.rsync.outputs.result }}"
+          MSG_MINIMAL: actions url,commit,ref
+
+      - name: Slack Notification (Forced Rebuild, Failed)
+        if: ${{ startsWith(github.ref, 'refs/tags/rebuild') && failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: "${{ github.event.repository.name }} | Github Actions Deployment"
+          SLACK_MSG_AUTHOR: ${{ github.actor }}
+          SLACK_ICON: ${{ steps.repo-icon.outputs.result != '' && steps.repo-icon.outputs.result || 'https://github.com/SPINE-LLC.png?size=128' }}
+          SLACK_COLOR: "#f2777a"
+          SLACK_TITLE: "Forced Deploy Failed:"
+          SLACK_FOOTER: "Deployment failed, check Actions URL to see logs."
+          MSG_MINIMAL: actions url,commit,ref
