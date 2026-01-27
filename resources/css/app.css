@@ -27,6 +27,7 @@
   @import './components/dropdown.css';
   @import './components/accordion.css';
   @import './components/close.css';
+  @import './components/skip-link.css';
 }
 
 /* blocks - not in a layer so that it can override WP */
