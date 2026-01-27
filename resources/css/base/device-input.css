@@ -1,0 +1,6 @@
+/* remove outline when not using keyboard */
+html[data-is-input]:not([data-is-input="keyboard"]) {
+  *:focus {
+    outline: none;
+  }
+}

@@ -7,6 +7,7 @@
 
 /* base */
 @layer base {
+  @import './base/device-input.css';
   @import './base/admin-bar.css';
   @import './base/variables.css';
   @import './base/html-body.css';
