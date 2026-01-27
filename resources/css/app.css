@@ -31,3 +31,4 @@
 /* blocks - not in a layer so that it can override WP */
 @import './blocks/button.css';
 @import './blocks/separator.css';
+@import './blocks/embed.css';
