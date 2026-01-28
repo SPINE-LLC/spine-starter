@@ -28,12 +28,27 @@ add_action('after_setup_theme', function () {
  * @return void
  */
 add_action('wp_update_nav_menu', function () {
-    delete_transient('primary_nav_' . get_current_blog_id());
-    delete_transient('primary_btns_nav_' . get_current_blog_id());
-    delete_transient('compact_nav_' . get_current_blog_id());
-    delete_transient('compact_btns_nav_' . get_current_blog_id());
-    delete_transient('footer_nav_' . get_current_blog_id());
-    delete_transient('privacy_nav_' . get_current_blog_id());
+    global $wpdb;
+    $blog_id = get_current_blog_id();
+    $transient_keys = [
+        'primary_nav_' . $blog_id,
+        'primary_btns_nav_' . $blog_id,
+        'compact_nav_' . $blog_id,
+        'compact_btns_nav_' . $blog_id,
+        'footer_nav_' . $blog_id,
+        'privacy_nav_' . $blog_id,
+    ];
+
+    foreach ($transient_keys as $key_pattern) {
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+            $wpdb->esc_like('_transient_' . $key_pattern) . '%'
+        ));
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+            $wpdb->esc_like('_transient_timeout_' . $key_pattern) . '%'
+        ));
+    }
 });
 
 /**
@@ -42,7 +57,9 @@ add_action('wp_update_nav_menu', function () {
  * @return string
  */
 function primary_nav() {
-    $cache_key = 'primary_nav_' . get_current_blog_id();
+    global $wp;
+    $current_url = md5(home_url(add_query_arg(array(), $wp->request)));
+    $cache_key = 'primary_nav_' . get_current_blog_id() . '_' . $current_url;
     $cached = get_transient($cache_key);
     if ($cached !== false) {
         return $cached;
@@ -64,7 +81,9 @@ function primary_nav() {
  * @return string
  */
 function primary_btns_nav() {
-    $cache_key = 'primary_btns_nav_' . get_current_blog_id();
+    global $wp;
+    $current_url = md5(home_url(add_query_arg(array(), $wp->request)));
+    $cache_key = 'primary_btns_nav_' . get_current_blog_id() . '_' . $current_url;
     $cached = get_transient($cache_key);
     if ($cached !== false) {
         return $cached;
@@ -86,7 +105,9 @@ function primary_btns_nav() {
  * @return string
  */
 function compact_btns_nav() {
-    $cache_key = 'compact_btns_nav_' . get_current_blog_id();
+    global $wp;
+    $current_url = md5(home_url(add_query_arg(array(), $wp->request)));
+    $cache_key = 'compact_btns_nav_' . get_current_blog_id() . '_' . $current_url;
     $cached = get_transient($cache_key);
     if ($cached !== false) {
         return $cached;
@@ -108,7 +129,9 @@ function compact_btns_nav() {
  * @return string
  */
 function compact_nav() {
-    $cache_key = 'compact_nav_' . get_current_blog_id();
+    global $wp;
+    $current_url = md5(home_url(add_query_arg(array(), $wp->request)));
+    $cache_key = 'compact_nav_' . get_current_blog_id() . '_' . $current_url;
     $cached = get_transient($cache_key);
     if ($cached !== false) {
         return $cached;
@@ -130,7 +153,9 @@ function compact_nav() {
  * @return string
  */
 function footer_nav() {
-    $cache_key = 'footer_nav_' . get_current_blog_id();
+    global $wp;
+    $current_url = md5(home_url(add_query_arg(array(), $wp->request)));
+    $cache_key = 'footer_nav_' . get_current_blog_id() . '_' . $current_url;
     $cached = get_transient($cache_key);
     if ($cached !== false) {
         return $cached;
@@ -151,7 +176,9 @@ function footer_nav() {
  * @return string
  */
 function privacy_nav() {
-    $cache_key = 'privacy_nav_' . get_current_blog_id();
+    global $wp;
+    $current_url = md5(home_url(add_query_arg(array(), $wp->request)));
+    $cache_key = 'privacy_nav_' . get_current_blog_id() . '_' . $current_url;
     $cached = get_transient($cache_key);
     if ($cached !== false) {
         return $cached;
