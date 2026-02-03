@@ -69,6 +69,15 @@ add_filter('theme_file_path', function ($path, $file) {
         : $path;
 }, 10, 2);
 
+/**
+ * Enqueue global styles to register the handle.
+ *
+ * @return void
+ */
+add_action('init', function () {
+    wp_enqueue_global_styles();
+});
+
 
 
 

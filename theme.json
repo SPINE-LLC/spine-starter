@@ -40,5 +40,6 @@
     "border": {
       "radius": true
     }
-  }
+  },
+  "styles": {}
 }
