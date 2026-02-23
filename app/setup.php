@@ -154,5 +154,14 @@ add_action('after_setup_theme', function () {
     ]);
 }, 20);
 
+/**
+ * Add no-js class removal script to head.
+ *
+ * @return void
+ */
+add_action( 'wp_head', function() {
+	echo "<script id=\"no-js\">(function(){'use strict';document.documentElement.classList.remove('no-js')})();</script>\n";
+}, 1 );
+
 
 
