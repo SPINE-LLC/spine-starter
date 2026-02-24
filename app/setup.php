@@ -31,6 +31,11 @@ add_filter('block_editor_settings_all', function ($settings) {
     return $settings;
 });
 
+/**
+ * Disable the block directory to prevent easy plugin installations.
+ */
+remove_action('enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets');
+
 
 
 /**
