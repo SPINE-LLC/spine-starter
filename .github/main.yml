@@ -343,6 +343,31 @@ jobs:
             fi
           "
 
+      - name: Clear site cache via WP-CLI (if available)
+        if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
+        run: |
+          THEME_PATH="${{ steps.cw-server.outputs.server_path }}"
+          SITE_ROOT="${THEME_PATH%/wp-content/themes/${{ env.THEME_NAME }}/}"
+
+          ssh -F ${{ steps.ssh-setup.outputs.ssh_config_path }} destination "
+            if command -v wp &>/dev/null; then
+              wp cache flush --path=\"$SITE_ROOT\" --allow-root && echo 'Object cache flushed' || true
+              wp rocket clean --confirm --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'WP Rocket cache cleared' || true
+              wp litespeed-purge all --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'LiteSpeed cache cleared' || true
+              wp breeze purge --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'Breeze cache cleared' || true
+              wp w3-total-cache flush all --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'W3 Total Cache cleared' || true
+              wp super-cache flush --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'WP Super Cache cleared' || true
+              wp fastest-cache clear all --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'WP Fastest Cache cleared' || true
+              wp comet-cache wipe --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'Comet Cache cleared' || true
+              wp cache-enabler clear --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'Cache Enabler cleared' || true
+              wp hummingbird clear --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'Hummingbird cache cleared' || true
+              wp autoptimize delete --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'Autoptimize cache cleared' || true
+              wp sg purge --path=\"$SITE_ROOT\" --allow-root 2>/dev/null && echo 'SG Optimizer cache cleared' || true
+            else
+              echo 'WP-CLI not found, skipping cache clear'
+            fi
+          "
+
       - name: Get notification icon
         id: repo-icon
         uses: actions/github-script@v7
