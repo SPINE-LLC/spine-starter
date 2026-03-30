@@ -130,9 +130,9 @@ jobs:
           SRC_CHANGES=0
           SRC_FILES=""
 
-          # Check each file to see if it's in the theme resources directory (excluding resources/deploy)
+          # Check each file to see if it's in the theme resources directory
           for file in $ALL_CHANGED; do
-            if [[ $file == resources/* && $file != resources/deploy/* ]]; then
+            if [[ $file == resources/* ]]; then
               SRC_CHANGES=$((SRC_CHANGES + 1))
               SRC_FILES="$SRC_FILES $file"
               echo "Theme resources file changed: $file"
@@ -326,7 +326,7 @@ jobs:
         run: |
           THEME_PATH="${{ steps.cw-server.outputs.server_path }}"
           SITE_ROOT="${THEME_PATH%/wp-content/themes/${{ env.THEME_NAME }}/}"
-          THEME_FAVICON="${THEME_PATH}resources/deploy/favicon.ico"
+          THEME_FAVICON="${THEME_PATH}resources/images/favicon.ico"
           SITE_FAVICON="${SITE_ROOT}/favicon.ico"
 
           ssh -F ${{ steps.ssh-setup.outputs.ssh_config_path }} destination "
@@ -349,10 +349,6 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const fs = require('fs');
-            if (fs.existsSync('resources/deploy/slack.png')) {
-              return `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.sha}/resources/deploy/slack.png`;
-            }
             const repo = await github.rest.repos.get({
               owner: context.repo.owner,
               repo: context.repo.repo
