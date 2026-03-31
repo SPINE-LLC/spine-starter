@@ -11,6 +11,7 @@ require_once __DIR__ . '/Walker/Accordion_Walker_Nav_Menu.php';
 require_once __DIR__ . '/Walker/Button_Walker_Nav_Menu.php';
 require_once __DIR__ . '/Structure/navigation.php';
 require_once __DIR__ . '/Structure/detect-vertical-positions.php';
+require_once __DIR__ . '/Structure/patterns-menu.php';
 
 use Illuminate\Support\Facades\Vite;
 
