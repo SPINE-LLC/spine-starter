@@ -22,6 +22,9 @@
 Thumbs.db
 tmp
 
+# Protect built assets on server when no build step runs
+Ppublic/build/
+
 # Theme/Plugin Specific
 .ackrc
 .deployignore
