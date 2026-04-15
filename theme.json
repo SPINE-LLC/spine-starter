@@ -4,8 +4,8 @@
   "version": 3,
   "settings": {
     "layout": {
-      "contentSize": "56.25rem",
-      "wideSize": "90rem"
+      "contentSize": "64rem",
+      "wideSize": "96rem"
     },
     "background": {
       "backgroundImage": true
@@ -35,7 +35,8 @@
     },
     "typography": {
       "defaultFontSizes": false,
-      "customFontSize": false
+      "customFontSize": false,
+      "customFontFamily": true
     },
     "border": {
       "radius": true
