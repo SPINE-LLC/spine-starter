@@ -14,28 +14,59 @@
   }
 }
 
-:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained {
+:where(.main.is-layout-constrained) {
   padding-inline: var(--site-content-gutter);
 }
 
-:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+:where(.editor-styles-wrapper .is-root-container,
+       .editor-styles-wrapper .block-editor-block-list__layout) {
+  padding-inline: var(--site-content-gutter);
+}
+
+:where(.main.is-layout-constrained)
   > .alignfull {
   inline-size: calc(100% + (var(--site-content-gutter) * 2));
   max-inline-size: none;
   margin-inline: calc(var(--site-content-gutter) * -1);
 }
 
-:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+:where(.editor-styles-wrapper .is-root-container,
+       .editor-styles-wrapper .block-editor-block-list__layout)
+  > .alignfull {
+  inline-size: calc(100% + (var(--site-content-gutter) * 2));
+  max-inline-size: none;
+  margin-inline: calc(var(--site-content-gutter) * -1);
+}
+
+:where(.main.is-layout-constrained)
   > .alignfull.is-layout-constrained {
   padding-inline: var(--site-content-gutter);
 }
 
-:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+:where(.editor-styles-wrapper .is-root-container,
+       .editor-styles-wrapper .block-editor-block-list__layout)
+  > .alignfull.is-layout-constrained {
+  padding-inline: var(--site-content-gutter);
+}
+
+:where(.main.is-layout-constrained)
   > :first-child:not(.alignfull) {
   margin-block-start: var(--wp--style--block-gap);
 }
 
-:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+:where(.editor-styles-wrapper .is-root-container,
+       .editor-styles-wrapper .block-editor-block-list__layout)
+  > :first-child:not(.alignfull) {
+  margin-block-start: var(--wp--style--block-gap);
+}
+
+:where(.main.is-layout-constrained)
+  > :last-child:not(.alignfull) {
+  margin-block-end: var(--wp--style--block-gap);
+}
+
+:where(.editor-styles-wrapper .is-root-container,
+       .editor-styles-wrapper .block-editor-block-list__layout)
   > :last-child:not(.alignfull) {
   margin-block-end: var(--wp--style--block-gap);
 }
