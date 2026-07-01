@@ -1,0 +1,31 @@
+/*
+ * Unlayered WordPress layout overrides.
+ *
+ * WordPress prints block layout styles outside Tailwind cascade layers, so
+ * rules here intentionally load after block CSS and outside @layer.
+ */
+:root {
+  --site-content-gutter: 1rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --site-content-gutter: 1.5rem;
+  }
+}
+
+:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained {
+  padding-inline: var(--site-content-gutter);
+}
+
+:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+  > .alignfull {
+  inline-size: calc(100% + (var(--site-content-gutter) * 2));
+  max-inline-size: none;
+  margin-inline: calc(var(--site-content-gutter) * -1);
+}
+
+:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+  > .alignfull.is-layout-constrained {
+  padding-inline: var(--site-content-gutter);
+}
