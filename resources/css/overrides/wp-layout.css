@@ -29,3 +29,13 @@
   > .alignfull.is-layout-constrained {
   padding-inline: var(--site-content-gutter);
 }
+
+:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+  > :first-child:not(.alignfull) {
+  margin-block-start: var(--wp--style--block-gap);
+}
+
+:where(.main, .editor-styles-wrapper .is-root-container).is-layout-constrained.is-layout-constrained
+  > :last-child:not(.alignfull) {
+  margin-block-end: var(--wp--style--block-gap);
+}
