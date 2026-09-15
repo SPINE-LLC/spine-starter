@@ -163,11 +163,23 @@ add_action('after_setup_theme', function () {
 /**
  * Add no-js class removal script to head.
  *
+ * Printed through wp_print_inline_script_tag() rather than echoed, so it leaves
+ * through WordPress's own inline-script API. That is the seam a strict Content
+ * Security Policy recognises, so the tag is given the response nonce; a raw
+ * echo carries no proof of where it came from and the browser refuses to run
+ * it.
+ *
+ * Priority 0 is the earliest slot WordPress offers on wp_head, so the class is
+ * gone before the title tag, enqueued styles and preload hints are emitted.
+ *
  * @return void
  */
 add_action( 'wp_head', function() {
-	echo "<script id=\"no-js\">(function(){'use strict';document.documentElement.classList.remove('no-js')})();</script>\n";
-}, 1 );
+	wp_print_inline_script_tag(
+		"(function(){'use strict';document.documentElement.classList.remove('no-js')})();",
+		[ 'id' => 'no-js' ]
+	);
+}, 0 );
 
 
 
