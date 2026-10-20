@@ -192,12 +192,9 @@ jobs:
         if: ${{ steps.changed-files.outputs.any_modified == 'true' || startsWith(github.ref, 'refs/tags/rebuild') }}
         id: cw-server
         run: |
-          # get access token
-          TOKEN=$(curl -X POST https://api.cloudways.com/api/v1/oauth/access_token \
-            -d "email=sdev@alignideas.com" \
-            -d "api_key=${{ secrets.CLOUDWAYS_API_KEY }}" | jq -r '.access_token')
-          SERVER=$(curl -X GET https://api.cloudways.com/api/v1/server \
-            -H "Authorization: Bearer $TOKEN" | jq -c '.servers[] | select(.id == "${{ env.CLOUDWAYS_SERVER_ID }}")')
+          SERVER=$(curl -fsS https://api.cloudways.com/api/v2/server \
+            -H "Authorization: Bearer ${{ secrets.CLOUDWAYS_DEPLOY_ACCESS_TOKEN }}" | jq -c '.servers[] | select(.id == "${{ env.CLOUDWAYS_SERVER_ID }}")')
+          [ -n "$SERVER" ] || { echo "::error::Cloudways server lookup failed"; exit 1; }
           echo "server_user=$(echo $SERVER | jq -rc '.master_user')" >> $GITHUB_OUTPUT
           echo "server_ip=$(echo $SERVER | jq -rc '.public_ip')" >> $GITHUB_OUTPUT
           echo "server_path=/home/master/applications/$(echo $SERVER | jq -rc '.apps[] | select(.id == "${{ env.CLOUDWAYS_APP_ID }}") | .symlink')/public_html/wp-content/themes/${{ env.THEME_NAME }}/" >> $GITHUB_OUTPUT
