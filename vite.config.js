@@ -35,7 +35,8 @@ export default defineConfig(({ mode }) => {
         ],
         refresh: true,
         assets: ['resources/images/**', 'resources/fonts/**'],
-        detectTls: appUrl?.host ?? null,
+        // Herd's certificate for an https APP_URL, none for http, auto-detect when unset.
+        detectTls: appUrl ? appUrl.protocol === 'https:' && appUrl.hostname : null,
       }),
 
       wordpressPlugin(),
