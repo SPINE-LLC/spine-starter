@@ -1,2 +1,4 @@
 allowBuilds:
-  esbuild: true
+  # Roots' Vite plugin pulls esbuild in through webpack, and the build never runs it.
+  esbuild: false
+saveExact: true

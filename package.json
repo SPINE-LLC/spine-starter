@@ -1,29 +1,33 @@
 {
-  "name": "sage",
+  "name": "spine-starter",
   "private": true,
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
   "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "translate": "npm run translate:pot && npm run translate:update",
+    "build": "vite build --logLevel warn",
+    "build:verbose": "vite build",
+    "build:dev": "vite build --mode development",
+    "verify:build": "node resources/scripts/verify-build-manifest.mjs",
+    "test:deploy-filter": "bash .github/scripts/test-create-rsync-filter.sh",
+    "translate": "pnpm run translate:pot && pnpm run translate:update",
     "translate:pot": "wp i18n make-pot . ./resources/lang/sage.pot --include=\"theme.json,patterns,app,resources\"",
     "translate:update": "for file in ./resources/lang/*.po; do wp i18n update-po ./resources/lang/sage.pot $file; done",
-    "translate:compile": "npm run translate:mo && npm run translate:js",
+    "translate:compile": "pnpm run translate:mo && pnpm run translate:js",
     "translate:js": "wp i18n make-json ./resources/lang --pretty-print",
     "translate:mo": "wp i18n make-mo ./resources/lang ./resources/lang"
   },
   "devDependencies": {
-    "@roots/vite-plugin": "^2.0.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "laravel-vite-plugin": "^3.0.0",
-    "tailwindcss": "^4.3.3",
-    "vite": "^8.0.0"
+    "@roots/vite-plugin": "2.2.0",
+    "@tailwindcss/vite": "4.3.5",
+    "laravel-vite-plugin": "3.2.1",
+    "tailwindcss": "4.3.5",
+    "vite": "8.3.8"
   },
   "dependencies": {
-    "postcss-custom-media": "^12.0.0",
-    "ua-parser-js": "^2.0.8"
+    "ua-parser-js": "2.0.10"
   }
 }
