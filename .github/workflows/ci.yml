@@ -1,0 +1,144 @@
+name: Theme CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+      - staging
+    tags:
+      - 'rebuild/dev/**'
+      - 'rebuild/staging/**'
+      - 'rebuild/prod/**'
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: pnpm run verify:build
+      - run: bash .github/scripts/test-create-rsync-filter.sh
+      - run: bash .github/scripts/test-deploy-target.sh
+      - name: Upload verified theme build
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: theme-build-${{ github.sha }}
+          path: public/build
+          if-no-files-found: error
+          retention-days: 1
+
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+          coverage: none
+      - run: composer validate --no-check-publish
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer lint
+
+  # The deploy jobs run in sites made from this starter, once
+  # .github/scripts/deploy-target.sh names their Cloudways applications.
+  deploy-dev:
+    if: github.event_name == 'push' && github.repository != 'SPINE-LLC/spine-starter' && (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/rebuild/dev/'))
+    needs: [node, php]
+    uses: ./.github/workflows/deploy-theme.yml
+    with:
+      target: dev
+    secrets:
+      CLOUDWAYS_DEPLOY_ACCESS_TOKEN: ${{ secrets.CLOUDWAYS_DEPLOY_ACCESS_TOKEN }}
+      CLOUDWAYS_APP_SSH_KEY: ${{ secrets.CLOUDWAYS_DEV_APP_SSH_KEY }}
+      PROXY_SERVER_IP: ${{ secrets.PROXY_SERVER_IP }}
+      PROXY_SERVER_USER: ${{ secrets.PROXY_SERVER_USER }}
+      PROXY_SERVER_SSH_KEY: ${{ secrets.PROXY_SERVER_SSH_KEY }}
+
+  deploy-staging:
+    if: github.event_name == 'push' && github.repository != 'SPINE-LLC/spine-starter' && (github.ref == 'refs/heads/staging' || startsWith(github.ref, 'refs/tags/rebuild/staging/'))
+    needs: [node, php]
+    uses: ./.github/workflows/deploy-theme.yml
+    with:
+      target: staging
+    secrets:
+      CLOUDWAYS_DEPLOY_ACCESS_TOKEN: ${{ secrets.CLOUDWAYS_DEPLOY_ACCESS_TOKEN }}
+      CLOUDWAYS_APP_SSH_KEY: ${{ secrets.CLOUDWAYS_STAGING_APP_SSH_KEY }}
+      PROXY_SERVER_IP: ${{ secrets.PROXY_SERVER_IP }}
+      PROXY_SERVER_USER: ${{ secrets.PROXY_SERVER_USER }}
+      PROXY_SERVER_SSH_KEY: ${{ secrets.PROXY_SERVER_SSH_KEY }}
+
+  deploy-prod:
+    if: github.event_name == 'push' && github.repository != 'SPINE-LLC/spine-starter' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rebuild/prod/'))
+    needs: [node, php]
+    uses: ./.github/workflows/deploy-theme.yml
+    with:
+      target: prod
+    secrets:
+      CLOUDWAYS_DEPLOY_ACCESS_TOKEN: ${{ secrets.CLOUDWAYS_DEPLOY_ACCESS_TOKEN }}
+      CLOUDWAYS_APP_SSH_KEY: ${{ secrets.CLOUDWAYS_PRODUCTION_APP_SSH_KEY }}
+      PROXY_SERVER_IP: ${{ secrets.PROXY_SERVER_IP }}
+      PROXY_SERVER_USER: ${{ secrets.PROXY_SERVER_USER }}
+      PROXY_SERVER_SSH_KEY: ${{ secrets.PROXY_SERVER_SSH_KEY }}
+
+  notify:
+    if: always() && github.event_name == 'push' && github.repository != 'SPINE-LLC/spine-starter'
+    needs: [node, php, deploy-dev, deploy-staging, deploy-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compile deployment outcome
+        id: outcome
+        env:
+          CI_FAILED: ${{ needs.node.result != 'success' || needs.php.result != 'success' }}
+          DEPLOY_FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+          DEPLOYED: ${{ needs.deploy-dev.outputs.deployed == 'true' || needs.deploy-staging.outputs.deployed == 'true' || needs.deploy-prod.outputs.deployed == 'true' }}
+          RSYNC_RESULT: ${{ needs.deploy-dev.outputs.rsync_result || needs.deploy-staging.outputs.rsync_result || needs.deploy-prod.outputs.rsync_result }}
+        run: |
+          if [[ "$CI_FAILED" == 'true' ]]; then
+            title='CI failed'
+            footer='Deployment did not run; check the Actions run.'
+            color=danger
+          elif [[ "$DEPLOY_FAILED" == 'true' ]]; then
+            title='Deployment failed'
+            footer='Check the Actions run for the failed step.'
+            color=danger
+          elif [[ "$DEPLOYED" == 'true' ]]; then
+            title='Deployment completed'
+            footer="$RSYNC_RESULT"
+            color=good
+          else
+            title='Deployment skipped'
+            footer="${RSYNC_RESULT:-No deployable changes found.}"
+            color='#cccccc'
+          fi
+          {
+            echo "title=$title"
+            echo "footer=$footer"
+            echo "color=$color"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send deployment notification
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: '${{ github.event.repository.name }} | Deployment'
+          SLACK_MSG_AUTHOR: ${{ github.actor }}
+          SLACK_COLOR: ${{ steps.outcome.outputs.color }}
+          SLACK_TITLE: ${{ steps.outcome.outputs.title }}
+          SLACK_FOOTER: ${{ steps.outcome.outputs.footer }}
+          MSG_MINIMAL: actions url,commit,ref

@@ -1,0 +1,451 @@
+name: Deploy theme
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+    outputs:
+      deploy_needed:
+        value: ${{ jobs.deploy.outputs.deploy_needed }}
+      deployed:
+        value: ${{ jobs.deploy.outputs.deployed }}
+      rsync_result:
+        value: ${{ jobs.deploy.outputs.rsync_result }}
+    secrets:
+      CLOUDWAYS_DEPLOY_ACCESS_TOKEN:
+        required: true
+      CLOUDWAYS_APP_SSH_KEY:
+        required: true
+      PROXY_SERVER_IP:
+        required: true
+      PROXY_SERVER_USER:
+        required: true
+      PROXY_SERVER_SSH_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    outputs:
+      deploy_needed: ${{ steps.deploy-decision.outputs.deploy_needed }}
+      deployed: ${{ steps.rsync.outputs.deployed }}
+      rsync_result: ${{ steps.rsync.outputs.result }}
+    environment: ${{ inputs.target == 'prod' && 'production' || inputs.target == 'dev' && 'development' || 'staging' }}
+    concurrency:
+      group: ${{ github.repository }}-${{ inputs.target }}-theme
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Select the deployment target
+        id: target
+        run: bash .github/scripts/deploy-target.sh '${{ inputs.target }}' >> "$GITHUB_ENV"
+
+      - name: Compile deployable changes
+        id: changed-files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96
+        with:
+          since_last_remote_commit: true
+          files_ignore_from_source_file: .deployignore
+          output_renamed_files_as_deleted_and_added: true
+
+      - name: Check asset build inputs
+        id: asset-build-changes
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_REF" == refs/tags/rebuild/* ]]; then
+            echo 'assets_need_deploy=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            changed_files=$(git diff-tree --root --no-commit-id --name-only -r "$HEAD_SHA")
+          else
+            changed_files=$(git diff --no-renames --name-only "$BASE_SHA" "$HEAD_SHA")
+          fi
+
+          assets_need_deploy=false
+          while IFS= read -r file; do
+            case "$file" in
+              .github/workflows/*|.github/scripts/*|.deployignore|composer.lock|resources/css/*|resources/js/*|resources/fonts/*|resources/images/*|theme.json|vite.config.js|package.json|pnpm-lock.yaml|pnpm-workspace.yaml)
+                assets_need_deploy=true
+                break
+                ;;
+            esac
+          done <<< "$changed_files"
+
+          echo "assets_need_deploy=$assets_need_deploy" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether deployment is necessary
+        id: deploy-decision
+        env:
+          DEPLOYABLE_CHANGES: ${{ steps.changed-files.outputs.any_modified }}
+          ASSET_CHANGES: ${{ steps.asset-build-changes.outputs.assets_need_deploy }}
+        run: |
+          if [[ "$DEPLOYABLE_CHANGES" == 'true' || "$ASSET_CHANGES" == 'true' || "$GITHUB_REF" == refs/tags/rebuild/* ]]; then
+            echo 'deploy_needed=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'deploy_needed=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download verified theme build
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: theme-build-${{ github.sha }}
+          path: public/build
+
+      - name: Set up PHP for production packages
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+          coverage: none
+
+      - name: Install production Composer packages
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        run: |
+          set -euo pipefail
+          composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+          test -f vendor/autoload.php
+          test -d vendor/roots/acorn
+
+      - name: Create rsync filter
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        run: bash .github/scripts/create-rsync-filter.sh .deployignore rsync_filter
+
+      - name: Resolve the Cloudways target
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        id: cloudways
+        env:
+          CLOUDWAYS_DEPLOY_ACCESS_TOKEN: ${{ secrets.CLOUDWAYS_DEPLOY_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          : "${CLOUDWAYS_DEPLOY_ACCESS_TOKEN:?Missing Cloudways deploy access token}"
+          server=$(curl -fsS --connect-timeout 10 --max-time 60 \
+            -H "Authorization: Bearer $CLOUDWAYS_DEPLOY_ACCESS_TOKEN" \
+            "https://api.cloudways.com/api/v2/servers/$CLOUDWAYS_SERVER_ID" | \
+            jq -ce --arg id "$CLOUDWAYS_SERVER_ID" 'select((.id | tostring) == $id) | {id, public_ip}')
+          app=$(curl -fsS --connect-timeout 10 --max-time 60 \
+            -H "Authorization: Bearer $CLOUDWAYS_DEPLOY_ACCESS_TOKEN" \
+            "https://api.cloudways.com/api/v2/app/$CLOUDWAYS_APP_ID" | \
+            jq -ce --arg id "$CLOUDWAYS_APP_ID" --arg server "$CLOUDWAYS_SERVER_ID" \
+              '.app | select((.id | tostring) == $id and (.server_id | tostring) == $server) | {id, sys_user, symlink, cname}')
+          [[ "$(jq -r '.public_ip' <<< "$server")" == "$EXPECTED_SERVER_IP" ]]
+          [[ "$(jq -r '.sys_user' <<< "$app")" == "$EXPECTED_SYS_USER" ]]
+          [[ "$(jq -r '.symlink' <<< "$app")" == "$EXPECTED_APP_FOLDER" ]]
+          [[ "$(jq -r '.cname' <<< "$app")" == "${SITE_URL#https://}" ]]
+          {
+            echo "server_ip=$EXPECTED_SERVER_IP"
+            echo "server_user=app-$EXPECTED_SYS_USER"
+            echo "wp_root=/home/master/applications/$EXPECTED_APP_FOLDER/public_html"
+            echo "theme_path=/home/master/applications/$EXPECTED_APP_FOLDER/public_html/wp-content/themes/$THEME_NAME/"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Configure application SSH through deployment proxy
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        id: ssh-setup
+        env:
+          CLOUDWAYS_APP_SSH_KEY: ${{ secrets.CLOUDWAYS_APP_SSH_KEY }}
+          PROXY_SERVER_IP: ${{ secrets.PROXY_SERVER_IP }}
+          PROXY_SERVER_SSH_KEY: ${{ secrets.PROXY_SERVER_SSH_KEY }}
+          PROXY_SERVER_USER: ${{ secrets.PROXY_SERVER_USER }}
+          SERVER_IP: ${{ steps.cloudways.outputs.server_ip }}
+          APP_SSH_USER: ${{ steps.cloudways.outputs.server_user }}
+        run: |
+          set -euo pipefail
+          : "${CLOUDWAYS_APP_SSH_KEY:?Missing application SSH key}"
+          : "${PROXY_SERVER_SSH_KEY:?Missing deployment proxy SSH key}"
+          : "${PROXY_SERVER_IP:?Missing deployment proxy IP}"
+          : "${PROXY_SERVER_USER:?Missing deployment proxy user}"
+          umask 0077
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$PROXY_SERVER_SSH_KEY" > "$HOME/.ssh/jump_key"
+          printf '%s\n' "$CLOUDWAYS_APP_SSH_KEY" > "$HOME/.ssh/dest_key"
+          cat > "$HOME/.ssh/config" <<EOF
+          Host jumphost
+            HostName $PROXY_SERVER_IP
+            User $PROXY_SERVER_USER
+            IdentityFile $HOME/.ssh/jump_key
+            IdentitiesOnly yes
+            BatchMode yes
+            StrictHostKeyChecking accept-new
+          Host destination
+            HostName $SERVER_IP
+            User $APP_SSH_USER
+            ProxyJump jumphost
+            IdentityFile $HOME/.ssh/dest_key
+            IdentitiesOnly yes
+            BatchMode yes
+            ConnectTimeout 15
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+            StrictHostKeyChecking accept-new
+          EOF
+          chmod 600 "$HOME/.ssh/jump_key" "$HOME/.ssh/dest_key" "$HOME/.ssh/config"
+          echo "config_path=$HOME/.ssh/config" >> "$GITHUB_OUTPUT"
+
+      - name: Verify exact WordPress target
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        run: |
+          set -euo pipefail
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination bash -seu -- \
+            '${{ steps.cloudways.outputs.wp_root }}' "$EXPECTED_SYS_USER" "$SITE_URL" "$THEME_NAME" "$CLOUDWAYS_SERVER_ID" <<'REMOTE'
+          set -o pipefail
+          wp_root="$1"
+          sys_user="$2"
+          expected_url="$3"
+          expected_theme="$4"
+          server_home="/home/$5.cloudwaysapps.com/$sys_user/public_html"
+          [[ "$(realpath -e "$wp_root")" == "$server_home" ]]
+          test -d "$wp_root/wp-content/themes/$expected_theme"
+          [[ "$(realpath -e "$wp_root/wp-content/themes/$expected_theme")" == "$server_home/wp-content/themes/$expected_theme" ]]
+          test -f "$wp_root/wp-config.php"
+          home_url=$(wp option get home --path="$wp_root" --skip-plugins --skip-themes)
+          site_url=$(wp option get siteurl --path="$wp_root" --skip-plugins --skip-themes)
+          stylesheet=$(wp option get stylesheet --path="$wp_root" --skip-plugins --skip-themes)
+          [[ "${home_url%/}" == "$expected_url" ]]
+          [[ "${site_url%/}" == "$expected_url" ]]
+          [[ "$stylesheet" == "$expected_theme" ]]
+          printf 'Verified %s with theme %s\n' "$home_url" "$stylesheet"
+          REMOTE
+
+      - name: Capture previous build manifest
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        id: previous-manifest
+        run: |
+          remote_manifest='${{ steps.cloudways.outputs.theme_path }}public/build/manifest.json'
+          previous_manifest="$RUNNER_TEMP/previous-build-manifest.json"
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination \
+            "if [ -f '$remote_manifest' ]; then cat '$remote_manifest'; else printf '{}\\n'; fi" > "$previous_manifest"
+          if ! jq empty "$previous_manifest" >/dev/null 2>&1; then
+            printf '{}\n' > "$previous_manifest"
+          fi
+          echo "path=$previous_manifest" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy theme via rsync
+        if: steps.deploy-decision.outputs.deploy_needed == 'true'
+        id: rsync
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin "$DEPLOY_BRANCH"
+          current_sha=$(git rev-parse FETCH_HEAD)
+          if [[ "$GITHUB_SHA" != "$current_sha" ]]; then
+            if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              echo "Rebuild tag must point to current $DEPLOY_BRANCH ($current_sha)" >&2
+              exit 1
+            fi
+            echo 'deployed=false' >> "$GITHUB_OUTPUT"
+            echo 'result=stale commit skipped' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # functions.php loads Acorn from vendor/, so vendor/ lands first. The old code
+          # runs against the new packages until the full transfer below, which also
+          # removes dropped packages. An upgrade the old code can't run on needs a
+          # maintenance window or an intermediate release.
+          rsync -az --no-owner --no-group --checksum --delay-updates --no-times \
+            -e "ssh -F ${{ steps.ssh-setup.outputs.config_path }}" \
+            --rsync-path='umask 0002 && rsync' \
+            --chmod=D775,F664 \
+            ./vendor/ 'destination:${{ steps.cloudways.outputs.theme_path }}vendor/'
+
+          rsync_output=$(rsync -az --no-owner --no-group --checksum --delete-delay --delay-updates --no-times \
+            --out-format='%o:%f' --stats \
+            --filter='P public/build/manifest.json' \
+            --filter='P public/build/assets/***' \
+            --filter='merge rsync_filter' \
+            -e "ssh -F ${{ steps.ssh-setup.outputs.config_path }}" \
+            --rsync-path='umask 0002 && rsync' \
+            --chmod=D775,F664 \
+            ./ 'destination:${{ steps.cloudways.outputs.theme_path }}')
+          printf '%s\n' "$rsync_output"
+          transferred=$(sed -nE 's/Number of regular files transferred: ([0-9,]+)/\1/p' <<< "$rsync_output" | tr -d ',')
+          created=$(sed -nE 's/Number of created files: ([0-9,]+)/\1/p' <<< "$rsync_output" | tr -d ',')
+          deleted=$(sed -nE 's/Number of deleted files: ([0-9,]+)/\1/p' <<< "$rsync_output" | tr -d ',')
+          echo 'deployed=true' >> "$GITHUB_OUTPUT"
+          echo "result=${transferred:-0} transferred, ${created:-0} created, ${deleted:-0} deleted" >> "$GITHUB_OUTPUT"
+
+      - name: Prune superseded build assets
+        if: steps.rsync.outputs.deployed == 'true'
+        run: |
+          set -euo pipefail
+          keep_assets="$RUNNER_TEMP/build-assets-keep.txt"
+          {
+            jq -r '[.[] | .file?, .css[]?, .assets[]?] | map(select(type == "string")) | unique[]' public/build/manifest.json
+            jq -r '[.[] | .file?, .css[]?, .assets[]?] | map(select(type == "string")) | unique[]' '${{ steps.previous-manifest.outputs.path }}'
+          } | awk 'NF' | sort -u > "$keep_assets"
+          test -s "$keep_assets" || exit 0
+          keep_assets_b64=$(base64 < "$keep_assets" | tr -d '\n')
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination \
+            "THEME_PATH='${{ steps.cloudways.outputs.theme_path }}' KEEP_ASSETS_B64='$keep_assets_b64' bash -seu" <<'REMOTE'
+          umask 0002
+          set -o pipefail
+          assets_dir="${THEME_PATH}public/build/assets"
+          test -d "$assets_dir" || exit 0
+          keep_assets=$(mktemp)
+          trap 'rm -f "$keep_assets"' EXIT
+          printf '%s' "$KEEP_ASSETS_B64" | base64 --decode > "$keep_assets"
+          cd "$assets_dir"
+          shopt -s nullglob
+          removed=0
+          for asset in *; do
+            [[ -f "$asset" && "$asset" =~ -[A-Za-z0-9_-]{6,}\.[^.]+$ ]] || continue
+            grep -Fxq "assets/$asset" "$keep_assets" && continue
+            rm -f -- "$asset"
+            removed=$((removed + 1))
+          done
+          echo "Superseded build asset prune complete ($removed removed)"
+          REMOTE
+
+      - name: Refresh Acorn caches
+        if: steps.rsync.outputs.deployed == 'true'
+        run: |
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination bash -seu -- \
+            '${{ steps.cloudways.outputs.wp_root }}' <<'REMOTE'
+          umask 0002
+          set -o pipefail
+          wp_root="$1"
+          cache="$wp_root/wp-content/cache/acorn/framework"
+          # Acorn never checks its package manifest against vendor/, so it is rebuilt
+          # after every deploy, before WP-CLI boots Acorn with a stale one.
+          rm -f "$cache/cache/packages.php" "$cache/cache/services.php"
+          wp acorn view:clear --path="$wp_root"
+          wp eval '
+          $views = WP_CONTENT_DIR . "/cache/acorn/framework/views";
+          $probe = $views . "/.deploy-writable-" . getmypid();
+          if (@file_put_contents($probe, "ok") === false) {
+              fwrite(STDERR, "Acorn view cache is not writable: {$views}\n");
+              exit(1);
+          }
+          unlink($probe);
+          echo "Acorn caches refreshed\n";
+          ' --path="$wp_root"
+          REMOTE
+
+      - name: Clear WordPress and outer caches
+        if: steps.rsync.outputs.deployed == 'true'
+        run: |
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination bash -seu -- \
+            '${{ steps.cloudways.outputs.wp_root }}' <<'REMOTE'
+          umask 0002
+          set -o pipefail
+          wp_root="$1"
+          wp option get home --path="$wp_root" >/dev/null
+          wp eval '
+          if (! class_exists("\\Spine_Toolkit\\Cache\\CachePurge")) {
+              fwrite(STDERR, "Spine Toolkit CachePurge unavailable\n");
+              exit(1);
+          }
+          if (wp_using_ext_object_cache() && ! wp_cache_flush()) {
+              fwrite(STDERR, "Object cache flush failed\n");
+              exit(1);
+          }
+          $report = \Spine_Toolkit\Cache\CachePurge::all();
+          if (! empty($report["failed"]) || ($report["wp_rocket"] ?? null) === false) {
+              fwrite(STDERR, "Cache purge failed: " . wp_json_encode($report) . "\n");
+              exit(1);
+          }
+          echo "WordPress caches cleared\n";
+          ' --path="$wp_root"
+          REMOTE
+
+      - name: Purge Cloudways cache and wait for completion
+        if: steps.rsync.outputs.deployed == 'true'
+        env:
+          CLOUDWAYS_DEPLOY_ACCESS_TOKEN: ${{ secrets.CLOUDWAYS_DEPLOY_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          operation_id=$(curl -fsS --connect-timeout 10 --max-time 60 -X POST \
+            https://api.cloudways.com/api/v2/app/cache/purge \
+            -H "Authorization: Bearer $CLOUDWAYS_DEPLOY_ACCESS_TOKEN" \
+            -d "server_id=$CLOUDWAYS_SERVER_ID" -d "app_id=$CLOUDWAYS_APP_ID" | \
+            jq -er '.operation_id // .response.operation_id')
+          [[ "$operation_id" =~ ^[A-Za-z0-9-]+$ ]]
+          completion=0
+          deadline=$((SECONDS + 180))
+          while ((SECONDS < deadline)); do
+            operation=$(curl -fsS --connect-timeout 5 --max-time 15 \
+              "https://api.cloudways.com/api/v2/operation/$operation_id" \
+              -H "Authorization: Bearer $CLOUDWAYS_DEPLOY_ACCESS_TOKEN" | \
+              jq -cer '.operation | {id, app_id, is_completed, status, message}')
+            app_id=$(jq -r '.app_id | tostring' <<< "$operation")
+            [[ "$app_id" == 'null' || "$app_id" == "$CLOUDWAYS_APP_ID" ]]
+            completion=$(jq -er '.is_completed | tonumber' <<< "$operation")
+            if [[ "$completion" == '1' ]]; then
+              echo "Cloudways cache purge completed: $operation_id"
+              break
+            fi
+            if [[ "$completion" == '-1' ]]; then
+              echo "Cloudways cache purge failed: $operation" >&2
+              exit 1
+            fi
+            sleep 5
+          done
+          [[ "$completion" == '1' ]]
+
+      - name: Verify deployed theme ownership
+        if: steps.rsync.outputs.deployed == 'true'
+        run: |
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination bash -seu -- \
+            '${{ steps.cloudways.outputs.theme_path }}' "$EXPECTED_SYS_USER" <<'REMOTE'
+          theme_path="$1"
+          expected_owner="$2:www-data"
+          for file in style.css functions.php vendor/autoload.php public/build/manifest.json; do
+            actual_owner=$(stat -c '%U:%G' "$theme_path$file")
+            [[ "$actual_owner" == "$expected_owner" ]]
+            printf '%s %s\n' "$file" "$actual_owner"
+          done
+          REMOTE
+
+      - name: Smoke-test deployed build
+        if: steps.rsync.outputs.deployed == 'true'
+        run: |
+          set -euo pipefail
+          page=$(mktemp)
+          trap 'rm -f "$page"' EXIT
+          effective_url=$(curl -fsSL --connect-timeout 10 --max-time 60 --retry 3 --retry-all-errors \
+            -o "$page" -w '%{url_effective}' "$SITE_URL/")
+          [[ "$effective_url" == "$SITE_URL/" ]]
+
+          current_asset=''
+          while IFS= read -r asset; do
+            if grep -Fq "/wp-content/themes/$THEME_NAME/public/build/$asset" "$page"; then
+              current_asset="$asset"
+              break
+            fi
+          done < <(jq -r '[.[] | .file?, .css[]?] | map(select(type == "string")) | unique[]' public/build/manifest.json)
+          test -n "$current_asset"
+          curl -fsSL --connect-timeout 10 --max-time 60 --retry 3 --retry-all-errors \
+            "$SITE_URL/wp-content/themes/$THEME_NAME/public/build/$current_asset" >/dev/null
+
+      - name: Record deploy summary
+        if: always()
+        env:
+          DEPLOY_NEEDED: ${{ steps.deploy-decision.outputs.deploy_needed }}
+          RSYNC_RESULT: ${{ steps.rsync.outputs.result }}
+        run: |
+          {
+            printf '### Theme deploy\n\n'
+            printf -- '- Commit: %s\n' "$GITHUB_SHA"
+            printf -- '- Target: %s (app %s)\n' "$SITE_URL" "$CLOUDWAYS_APP_ID"
+            printf -- '- Deploy needed: %s\n' "${DEPLOY_NEEDED:-unknown}"
+            if [[ -n "$RSYNC_RESULT" ]]; then
+              printf -- '- Rsync: %s\n' "$RSYNC_RESULT"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

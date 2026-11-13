@@ -5,3 +5,5 @@
 .env
 npm-debug.log
 .kilo/*
+.DS_Store
+rsync_filter

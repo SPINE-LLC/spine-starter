@@ -7,6 +7,11 @@
 namespace App;
 
 /**
+ * Keeps Acorn's version out of the response headers.
+ */
+add_filter('acorn/powered_by', '__return_false');
+
+/**
  * Add "… Continued" to the excerpt.
  *
  * @return string

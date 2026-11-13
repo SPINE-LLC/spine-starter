@@ -1,12 +1,15 @@
+{{--
+  The document shell. The matched view renders inside main#main, after wp_head()
+  and the header, so hooks and generated IDs run in the order a classic theme runs
+  them. A view that used @extends would render before wp_head().
+--}}
+@php(do_action('get_header', null, []))
 <!doctype html>
 <html class="no-js" @php(language_attributes())>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    @php(do_action('get_header'))
     @php(wp_head())
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
   </head>
 
   <body @php(body_class())>
@@ -20,19 +23,13 @@
       @include('sections.header')
 
       <main id="main" class="main is-layout-constrained">
-        @yield('content')
+        @include($content)
       </main>
 
-      @hasSection('sidebar')
-        <aside class="sidebar">
-          @yield('sidebar')
-        </aside>
-      @endif
-
+      @php(do_action('get_footer', null, []))
       @include('sections.footer')
     </div>
 
-    @php(do_action('get_footer'))
     @php(wp_footer())
   </body>
 </html>
