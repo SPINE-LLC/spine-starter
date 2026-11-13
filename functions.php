@@ -31,12 +31,22 @@ require $composer;
 |
 */
 
-Application::configure()
+// With WP_DEBUG and WP_DEBUG_DISPLAY on, Acorn would throw PHP warnings and
+// notices as exceptions and abort requests that WordPress lets continue.
+add_filter('acorn/throw_error_exception', '__return_false');
+
+$app = Application::configure()
     ->withProviders([
         App\Providers\ThemeServiceProvider::class,
         App\Providers\BlocksProvider::class,
     ])
     ->boot();
+
+// Acorn bootstraps itself for web requests and WP-CLI only. A plain PHP load,
+// such as a server cron running `php wp-cron.php`, needs the providers too.
+if ($app->runningInConsole() && ! $app->isBooted()) {
+    $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+}
 
 /*
 |--------------------------------------------------------------------------
