@@ -32,6 +32,7 @@ jobs:
       - run: pnpm run verify:build
       - run: bash .github/scripts/test-create-rsync-filter.sh
       - run: bash .github/scripts/test-deploy-target.sh
+      - run: bash .github/scripts/test-copy-site-favicon.sh
       - name: Upload verified theme build
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v7.0.2
