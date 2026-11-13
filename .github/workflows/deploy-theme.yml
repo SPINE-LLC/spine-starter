@@ -313,6 +313,13 @@ jobs:
           echo "Superseded build asset prune complete ($removed removed)"
           REMOTE
 
+      - name: Copy the theme favicon to the site root
+        if: steps.rsync.outputs.deployed == 'true'
+        run: |
+          ssh -F "${{ steps.ssh-setup.outputs.config_path }}" destination bash -s -- \
+            '${{ steps.cloudways.outputs.theme_path }}' '${{ steps.cloudways.outputs.wp_root }}' \
+            < .github/scripts/copy-site-favicon.sh
+
       - name: Refresh Acorn caches
         if: steps.rsync.outputs.deployed == 'true'
         run: |
