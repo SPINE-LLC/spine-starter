@@ -1,62 +1,79 @@
-# Note: In the Github Actions deployment this file gets converted into an rsync
-# filter format. It's updated in the following order, line by line, before
-# being sent to the rsync in the '--filter="merge {filters}"' option:
-#   1. If a line is a comment or empty, remove it and continue
-#   2. If a line starts with a '!', change it to '+' and continue
-#   3. If a line starts with a 'P', don't change it and continue
-#   4. If a line doesn't match any of the above, prefix it with '-' and continue
-# See 'FILTER RULES' for more details on the rsync filters:
-#   https://linux.die.net/man/1/rsync
+# Files the theme deploy leaves out. .github/scripts/create-rsync-filter.sh turns
+# each line into an rsync filter rule: a line starting with ! becomes an include,
+# a line starting with "P " becomes a protect rule, and any other line becomes an
+# exclude. Comments and blank lines are skipped. vendor/ and public/build/ ship.
 
-# Standard System tmp files/folders
-*~
-.DS_Store
-.htaccess
-.svn
-.cvs
-*.bak
-*.log
-*.swp
-.tmb
-.quarantine
-Thumbs.db
-tmp
+# Agent, design, and operator documentation.
+.agents/
+.agents/**
+.claude
+.claude/**
+.cursor/
+.cursor/**
+.idea/
+.idea/**
+.impeccable/
+.impeccable/**
+.kilo/
+.kilo/**
+.kilocode/
+.kilocode/**
+.vscode/
+.vscode/**
+.github/
+.github/**
+resources/scripts/
+resources/scripts/**
+AGENTS.md
+AI_GUIDELINES.md
+CLAUDE.md
+DESIGN.md
+GLOSSARY.md
+LICENSE
+LICENSE.md
+PRODUCT.md
+README
+README.md
+skills-lock.json
+docs/
+docs/**
 
-# Protect built assets on server when no build step runs
-Ppublic/build/
-
-# Theme/Plugin Specific
+# Local project tooling and dependencies.
+.git/
+.git/**
 .ackrc
 .deployignore
 .editorconfig
 .env
-.env.sample
-.git
+.env.*
 .gitattributes
-.github
-.github/**
 .gitignore
-.gitkeep
-.kilocode
+.node-version
 .npmrc
-.vscode
-.idea
-AI_GUIDELINES.md
-bs-config.mjs
-change-theme.js
+.nvmrc
+bun.lock
+composer.lock
 eslint.config.js
-id_rsa
-LICENSE
-LICENSE.md
-node_modules
-npm-debug.log
+node_modules/
+node_modules/**
 package-lock.json
 package.json
-phpcs.xml.dist
+pint.json
 pnpm-lock.yaml
-README.md
-README
+pnpm-workspace.yaml
 vite.config.js
-vite.dev.json
 yarn.lock
-bun.lock
+
+# Local and generated noise. public/build is intentionally deployable.
+*~
+*.bak
+*.log
+*.sql
+*.sqlite
+*.swp
+.DS_Store
+Thumbs.db
+id_rsa
+public/hot
+rsync_filter
+tmp
