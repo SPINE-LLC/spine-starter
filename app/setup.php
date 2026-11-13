@@ -85,13 +85,11 @@ add_filter('theme_file_path', function ($path, $file) {
 }, 10, 2);
 
 /**
- * Enqueue global styles to register the handle.
- *
- * @return void
+ * Prints the global styles before the block styles, so a block style variation,
+ * such as the outline button's border, wins over the global element styles.
+ * WordPress enqueues them later on the same hook.
  */
-add_action('init', function () {
-    wp_enqueue_global_styles();
-});
+add_action('wp_enqueue_scripts', 'wp_enqueue_global_styles', 0);
 
 /**
  * Register the initial theme setup.
