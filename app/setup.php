@@ -18,21 +18,6 @@ use Illuminate\Support\Facades\Vite;
 
 
 /**
- * Inject styles into the block editor.
- *
- * @return array
- */
-add_filter('block_editor_settings_all', function ($settings) {
-    $style = Vite::asset('resources/css/editor.css');
-
-    $settings['styles'][] = [
-        'css' => "@import url('{$style}')",
-    ];
-
-    return $settings;
-});
-
-/**
  * Disable the block directory to prevent easy plugin installations.
  */
 remove_action('enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets');
@@ -40,26 +25,56 @@ remove_action('enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_
 
 
 /**
- * Inject scripts into the block editor.
+ * Enqueues the theme stylesheet and script last, so they follow every plugin's.
  *
- * @return void
+ * Enqueued handles, not printed tags, let Spine Toolkit stamp its Content Security
+ * Policy nonce on them.
  */
-add_filter('admin_head', function () {
-    if (! get_current_screen()?->is_block_editor()) {
+add_action('wp_enqueue_scripts', function (): void {
+    if (Vite::isRunningHot()) {
+        wp_enqueue_script('vite-client', Vite::asset('@vite/client'), [], null, false);
+    }
+
+    wp_enqueue_style('theme', Vite::asset('resources/css/app.css'), [], null);
+    wp_enqueue_script('theme', Vite::asset('resources/js/app.js'), [], null, true);
+}, 9999999);
+
+/**
+ * Loads the theme's ES module scripts as modules.
+ */
+add_filter('script_loader_tag', function (string $tag, string $handle): string {
+    if (in_array($handle, ['vite-client', 'theme', 'theme-editor'], true) && ! str_contains($tag, 'type=')) {
+        $tag = str_replace('<script ', '<script type="module" ', $tag);
+    }
+
+    return $tag;
+}, 10, 2);
+
+/**
+ * Enqueues the block editor script with the WordPress packages it imports, which
+ * the build lists in `editor.deps.json`.
+ */
+add_action('enqueue_block_editor_assets', function (): void {
+    wp_enqueue_script(
+        'theme-editor',
+        Vite::asset('resources/js/editor.js'),
+        json_decode(Vite::content('editor.deps.json')),
+        null,
+        true
+    );
+});
+
+/**
+ * Loads the editor stylesheet into the editor canvas from the Vite dev server, which
+ * editor styles can't point at. The editor loads block assets inside its iframe.
+ */
+add_action('enqueue_block_assets', function (): void {
+    if (! Vite::isRunningHot() || ! is_admin()) {
         return;
     }
 
-    $dependencies = json_decode(Vite::content('editor.deps.json'));
-
-    foreach ($dependencies as $dependency) {
-        if (! wp_script_is($dependency)) {
-            wp_enqueue_script($dependency);
-        }
-    }
-
-    echo Vite::withEntryPoints([
-        'resources/js/editor.js',
-    ])->toHtml();
+    wp_enqueue_script('vite-client', Vite::asset('@vite/client'), [], null, false);
+    wp_enqueue_style('theme-editor', Vite::asset('resources/css/editor.css'), [], null);
 });
 
 
@@ -109,6 +124,16 @@ add_action('after_setup_theme', function () {
      * @link https://developer.wordpress.org/block-editor/developers/themes/theme-support/#disabling-the-default-block-patterns
      */
     remove_theme_support('core-block-patterns');
+
+    /**
+     * Style the editor canvas with the built editor stylesheet. Editor styles take a
+     * path relative to the theme, so they can't point at the Vite dev server.
+     */
+    add_theme_support('editor-styles');
+
+    if (! Vite::isRunningHot()) {
+        add_editor_style(str_replace(get_theme_file_uri().'/', '', Vite::asset('resources/css/editor.css')));
+    }
 
     /**
      * Enable plugins to manage the document title.
