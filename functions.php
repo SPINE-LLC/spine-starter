@@ -1,5 +1,8 @@
 <?php
 
+use App\Providers\BlocksProvider;
+use App\Providers\ThemeServiceProvider;
+use Illuminate\Contracts\Console\Kernel;
 use Roots\Acorn\Application;
 
 /*
@@ -37,15 +40,15 @@ add_filter('acorn/throw_error_exception', '__return_false');
 
 $app = Application::configure()
     ->withProviders([
-        App\Providers\ThemeServiceProvider::class,
-        App\Providers\BlocksProvider::class,
+        ThemeServiceProvider::class,
+        BlocksProvider::class,
     ])
     ->boot();
 
 // Acorn bootstraps itself for web requests and WP-CLI only. A plain PHP load,
 // such as a server cron running `php wp-cron.php`, needs the providers too.
 if ($app->runningInConsole() && ! $app->isBooted()) {
-    $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+    $app->make(Kernel::class)->bootstrap();
 }
 
 /*

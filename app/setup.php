@@ -6,23 +6,19 @@
 
 namespace App;
 
-require_once __DIR__ . '/Walker/Aria_Walker_Nav_Menu.php';
-require_once __DIR__ . '/Walker/Accordion_Walker_Nav_Menu.php';
-require_once __DIR__ . '/Walker/Button_Walker_Nav_Menu.php';
-require_once __DIR__ . '/Structure/navigation.php';
-require_once __DIR__ . '/Structure/detect-vertical-positions.php';
-require_once __DIR__ . '/Structure/patterns-menu.php';
+require_once __DIR__.'/Walker/Aria_Walker_Nav_Menu.php';
+require_once __DIR__.'/Walker/Accordion_Walker_Nav_Menu.php';
+require_once __DIR__.'/Walker/Button_Walker_Nav_Menu.php';
+require_once __DIR__.'/Structure/navigation.php';
+require_once __DIR__.'/Structure/detect-vertical-positions.php';
+require_once __DIR__.'/Structure/patterns-menu.php';
 
 use Illuminate\Support\Facades\Vite;
-
-
 
 /**
  * Disable the block directory to prevent easy plugin installations.
  */
 remove_action('enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets');
-
-
 
 /**
  * Enqueues the theme stylesheet and script last, so they follow every plugin's.
@@ -77,8 +73,6 @@ add_action('enqueue_block_assets', function (): void {
     wp_enqueue_style('theme-editor', Vite::asset('resources/css/editor.css'), [], null);
 });
 
-
-
 /**
  * Use the generated theme.json file.
  *
@@ -99,11 +93,6 @@ add_action('init', function () {
     wp_enqueue_global_styles();
 });
 
-
-
-
-
-
 /**
  * Register the initial theme setup.
  *
@@ -116,7 +105,6 @@ add_action('after_setup_theme', function () {
      * @link https://wptavern.com/gutenberg-10-5-embeds-pdfs-adds-verse-block-color-options-and-introduces-new-patterns
      */
     remove_theme_support('block-templates');
-
 
     /**
      * Disable the default block patterns.
@@ -171,7 +159,6 @@ add_action('after_setup_theme', function () {
         'style',
     ]);
 
-
     /**
      * Enable custom logo support.
      *
@@ -199,12 +186,9 @@ add_action('after_setup_theme', function () {
  *
  * @return void
  */
-add_action( 'wp_head', function() {
-	wp_print_inline_script_tag(
-		"(function(){'use strict';document.documentElement.classList.remove('no-js')})();",
-		[ 'id' => 'no-js' ]
-	);
-}, 0 );
-
-
-
+add_action('wp_head', function () {
+    wp_print_inline_script_tag(
+        "(function(){'use strict';document.documentElement.classList.remove('no-js')})();",
+        ['id' => 'no-js']
+    );
+}, 0);
