@@ -1,29 +1,32 @@
-@import "tailwindcss";
+/*
+ * The editor canvas: the front end's content styles, so posts look as they do on
+ * the site. WordPress adds this file unscoped inside the canvas, beside the
+ * editor's own buttons and placeholders, so the reset and type styles stop at
+ * those, and the site's header, footer, and menu styles stay out.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 
 /* theme */
 @import './theme/colors.css';
 
 /* base */
 @layer base {
-  @import './base/admin-bar.css';
-  @import './base/variables.css';
-  @import './base/html-body.css';
+  /* Every WordPress component and editor element, except the ones that hold block content. */
+  @scope (body) to (.block-list-appender, [class*='components-']:not(.components-disabled, .components-resizable-box__container), [class*='block-editor-']:not(.block-editor-block-list__block, .block-editor-block-list__layout, .block-editor-inner-blocks, .block-editor-inner-content, .block-editor-rich-text__editable)) {
+    @import 'tailwindcss/preflight.css';
+    @import './base/typography.css';
+
+    /* The reset sets this on html, which the scope can't reach. */
+    :scope {
+      tab-size: 4;
+    }
+  }
+
   @import './base/details.css';
-  @import './base/typography.css';
-  @import './base/dialog.css';
-  @import './base/nav.css';
   @import './base/backgrounds.css';
   @import './base/align.css';
-}
-
-/* components */
-@layer components {
-  @import './components/header.css';
-  @import './components/main.css';
-  @import './components/footer.css';
-  @import './components/dropdown.css';
-  @import './components/accordion.css';
-  @import './components/close.css';
 }
 
 /* blocks - not in a layer so that it can override WP */

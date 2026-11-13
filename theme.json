@@ -43,5 +43,10 @@
       "radius": true
     }
   },
-  "styles": {}
+  "styles": {
+    "typography": {
+      "fontFamily": "var(--wp--preset--font-family--sans)",
+      "lineHeight": "1.5"
+    }
+  }
 }
